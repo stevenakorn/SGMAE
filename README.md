@@ -1,0 +1,1562 @@
+[Uploading index.html.html…]()
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燎原軍議 — 三國志戰略版(台港澳服)配將模擬器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14; --bg2:#0d1220; --panel:#121826; --panel2:#182136; --line:#243352;
+    --ink:#dfe7f5; --dim:#8494b3; --faint:#54627f;
+    --fire:#ff4d2e; --fire2:#ff8a3d; --cyan:#35c9dd; --gold:#e8b34b;
+    --wei:#4a8df0; --shu:#3fbf74; --wu:#f05252; --qun:#e8a23a;
+    --ok:#4ade80; --bad:#f87171;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:
+      radial-gradient(1200px 500px at 80% -10%, #1a2440 0%, transparent 60%),
+      radial-gradient(900px 400px at -10% 110%, #2a1420 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;}
+  body{padding:14px;max-width:1180px;margin:0 auto;}
+  .num{font-family:"Rajdhani",monospace;font-weight:700;letter-spacing:.5px;}
+
+  /* 斜切電競面板 */
+  .panel{background:linear-gradient(160deg,var(--panel2),var(--panel));
+    border:1px solid var(--line);
+    clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
+    position:relative;}
+  .panel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--fire),var(--fire2) 30%,transparent 70%);opacity:.85;}
+
+  header{display:flex;align-items:center;gap:16px;padding:16px 20px;margin-bottom:14px;}
+  header .mark{width:58px;height:58px;flex:0 0 auto;filter:drop-shadow(0 0 10px #ff4d2e66);}
+  header h1{font-size:26px;font-weight:900;letter-spacing:8px;
+    background:linear-gradient(90deg,#fff,var(--fire2) 60%,var(--fire));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  header p{font-size:12px;color:var(--dim);letter-spacing:2px;margin-top:5px;}
+  header .tag{margin-left:auto;font-size:11px;color:var(--cyan);border:1px solid #2a4a55;
+    padding:4px 10px;letter-spacing:1px;white-space:nowrap;}
+
+  nav{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  nav button{flex:1;min-width:110px;padding:13px 8px;font-size:15px;letter-spacing:4px;
+    background:var(--panel);color:var(--dim);border:1px solid var(--line);cursor:pointer;
+    font-family:inherit;font-weight:700;
+    clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);transition:.15s;}
+  nav button:hover{color:var(--ink);border-color:var(--fire);}
+  nav button.on{background:linear-gradient(120deg,#3a1510,#241826);color:#fff;
+    border-color:var(--fire);box-shadow:0 0 16px #ff4d2e44, inset 0 0 12px #ff4d2e22;}
+  nav button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+
+  section{display:none}section.on{display:block}
+  h2{font-size:15px;color:var(--fire2);letter-spacing:4px;margin:16px 0 10px;font-weight:900;}
+  h2::before{content:"◤ ";color:var(--fire);}
+  .hint{font-size:12px;color:var(--dim);line-height:1.8;margin:8px 0;}
+
+  .team-head{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:12px 16px;margin-bottom:10px;flex-wrap:wrap;}
+  .cost{font-size:13px;color:var(--dim);letter-spacing:1px;}
+  .cost b{color:var(--gold);font-size:22px;margin:0 4px;}
+  .cost.over b{color:var(--bad);text-shadow:0 0 8px #f8717188;}
+  input[type=number],input[type=text],input[type=password],select,textarea{
+    background:#0a0f1c;color:var(--ink);border:1px solid var(--line);
+    padding:7px 9px;font-family:inherit;font-size:13px;}
+  input:focus,select:focus,textarea:focus{outline:1px solid var(--cyan);}
+  .team-head input[type=number]{width:64px;}
+
+  .slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+  .slot{padding:14px;min-height:170px;position:relative;}
+  .slot .role{position:absolute;top:10px;right:16px;font-size:11px;color:var(--faint);
+    letter-spacing:3px;}
+  .slot .empty-btn{width:100%;height:150px;background:#0c1120;color:var(--faint);
+    border:1px dashed var(--line);font-size:15px;letter-spacing:4px;cursor:pointer;
+    font-family:inherit;transition:.15s;}
+  .slot .empty-btn:hover{color:var(--fire2);border-color:var(--fire);}
+  .genrow{display:flex;gap:12px;align-items:flex-start;}
+  .genrow canvas,.genrow img{width:72px;height:72px;flex:0 0 auto;object-fit:cover;
+    border:1px solid var(--line);box-shadow:0 4px 14px #0009;}
+  .geninfo{flex:1;min-width:0;}
+  .geninfo .nm{font-size:17px;font-weight:900;letter-spacing:2px;}
+  .fx{font-size:10px;padding:2px 7px;margin-left:7px;vertical-align:2px;letter-spacing:1px;
+    clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);color:#0a0e14;font-weight:700;}
+  .fx.魏{background:var(--wei)} .fx.蜀{background:var(--shu)}
+  .fx.吳{background:var(--wu)} .fx.群{background:var(--qun)}
+  .geninfo .st{font-size:11.5px;color:var(--dim);margin-top:4px;line-height:1.7;}
+  .apt b{color:var(--gold)}
+  .builtin{font-size:12px;color:var(--cyan);margin-top:2px;}
+  .builtin small{color:var(--faint)}
+  .slot .rm{position:absolute;bottom:12px;right:14px;background:transparent;color:#f0a0a0;
+    border:1px solid #5a2a2a;font-size:11px;padding:4px 12px;cursor:pointer;font-family:inherit;
+    letter-spacing:2px;}
+  .slot .rm:hover{background:#3a1512;}
+  .tacs{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+  .tacs select{width:100%;font-size:12px;}
+  .bk{margin-top:6px;display:flex;flex-direction:column;gap:4px;}
+  .bkrow{display:flex;gap:4px;align-items:center;}
+  .bkrow .blab,.redrow .blab{font-size:11px;color:var(--faint);letter-spacing:1px;flex:0 0 40px;}
+  .bkrow select{flex:1;min-width:0;font-size:11px;padding:4px 2px;
+    background:#0a0f1c;color:var(--gold);border:1px solid var(--line);}
+  .redrow{margin-top:6px;display:flex;gap:6px;align-items:center;}
+  .redrow select{font-size:11px;padding:4px;background:#0a0f1c;color:var(--fire2);border:1px solid var(--line);}
+  .redrow .rcap{font-size:11px;color:var(--dim);}
+  .addrow{margin-top:4px;display:flex;gap:5px;}
+  .addbox{flex:1;display:flex;align-items:center;gap:2px;}
+  .addbox label{font-size:11px;color:var(--dim);}
+  .addbox input{width:100%;font-size:11px;padding:3px;background:#0a0f1c;color:var(--ink);border:1px solid var(--line);}
+
+  /* 選將視窗 */
+  .modal{position:fixed;inset:0;background:#04060acc;backdrop-filter:blur(4px);
+    display:none;z-index:50;padding:20px;overflow:auto;}
+  .modal.on{display:block}
+  .modal .inner{max-width:960px;margin:0 auto;padding:18px;}
+  .bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
+  .bar button{padding:7px 14px;background:var(--panel2);color:var(--dim);
+    border:1px solid var(--line);cursor:pointer;font-family:inherit;font-size:13px;
+    letter-spacing:2px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);}
+  .bar button.on{background:var(--fire);color:#fff;border-color:var(--fire);}
+  .bar input{flex:1;min-width:130px;}
+  .genlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:9px;}
+  .gencard{display:flex;gap:10px;padding:9px;cursor:pointer;align-items:center;
+    background:var(--panel);border:1px solid var(--line);transition:.12s;}
+  .gencard:hover{border-color:var(--fire);box-shadow:0 0 10px #ff4d2e33;}
+  .gencard canvas,.gencard img{width:52px;height:52px;flex:0 0 auto;object-fit:cover;}
+  .gencard .nm{font-size:14px;font-weight:700;}
+  .gencard .sub{font-size:11px;color:var(--dim);margin-top:2px;line-height:1.55;}
+  .closebtn{display:block;margin:16px auto 0;padding:10px 36px;background:var(--panel2);
+    color:var(--ink);border:1px solid var(--line);cursor:pointer;font-family:inherit;
+    font-size:14px;letter-spacing:4px;}
+
+  /* 對戰 */
+  .battle-bar{display:flex;gap:12px;align-items:center;margin:16px 0;flex-wrap:wrap;}
+  #fightBtn{padding:14px 40px;font-size:17px;letter-spacing:6px;cursor:pointer;
+    background:linear-gradient(120deg,var(--fire),#c22a10);color:#fff;border:none;
+    font-family:inherit;font-weight:900;
+    clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);
+    box-shadow:0 0 22px #ff4d2e55;transition:.15s;}
+  #fightBtn:hover{box-shadow:0 0 34px #ff4d2e99;}
+  #fightBtn:disabled{opacity:.5;cursor:wait;box-shadow:none;}
+  .battle-bar label{font-size:12px;color:var(--dim);}
+  #result{padding:16px;display:none;}
+  #result.on{display:block}
+  .winline{font-size:15px;margin-bottom:10px;letter-spacing:1px;color:var(--dim);}
+  .winline b{font-size:20px;}
+  .winline b.me{color:var(--ok);text-shadow:0 0 10px #4ade8055;}
+  .winline b.foe{color:var(--bad);text-shadow:0 0 10px #f8717155;}
+  #chart{width:100%;height:auto;display:block;background:#080b12;border:1px solid var(--line);}
+  .legend{display:flex;gap:18px;font-size:12px;color:var(--dim);margin:10px 0;flex-wrap:wrap;}
+  .legend i{display:inline-block;width:14px;height:3px;margin-right:6px;vertical-align:3px;}
+  #roundlog{font-size:12px;color:var(--dim);line-height:2;margin-top:10px;
+    font-family:"Rajdhani",monospace;white-space:pre-wrap;letter-spacing:.5px;}
+
+  /* AI 軍師 */
+  .ai-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+  .ownlist{display:flex;flex-wrap:wrap;gap:6px;padding:12px;}
+  .chip{padding:5px 12px;font-size:13px;background:#0c1120;color:var(--dim);
+    border:1px solid var(--line);cursor:pointer;font-family:inherit;letter-spacing:1px;}
+  .chip.on{background:#12303a;color:var(--cyan);border-color:var(--cyan);}
+  .ai-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0;}
+  .btn2{padding:10px 22px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    cursor:pointer;font-family:inherit;font-size:14px;letter-spacing:2px;}
+  .btn2:hover{border-color:var(--cyan);color:var(--cyan);}
+  .btn-cta{padding:12px 30px;background:linear-gradient(120deg,#0f4b5a,#123);color:#dff6ff;
+    border:1px solid var(--cyan);cursor:pointer;font-family:inherit;font-size:15px;
+    letter-spacing:4px;font-weight:700;box-shadow:0 0 16px #35c9dd33;}
+  .btn-cta:disabled{opacity:.5;cursor:wait;}
+  #aiOut{padding:16px;font-size:14px;line-height:2;white-space:pre-wrap;display:none;color:#cfe3ff;}
+  #aiOut.on{display:block}
+  .keyrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px;}
+  .keyrow input{flex:1;min-width:200px;}
+
+  /* 圖鑑 + 編輯器 */
+  .dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:9px;}
+  #editor .inner{max-width:520px;}
+  .edrow{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;margin:8px 0;}
+  .edrow label{font-size:13px;color:var(--dim);letter-spacing:1px;}
+  .ed-actions{display:flex;gap:10px;margin-top:14px;justify-content:flex-end;}
+
+  footer{margin-top:22px;font-size:11px;color:var(--faint);line-height:1.9;padding:12px 6px;}
+  @media(max-width:560px){
+    header h1{font-size:19px;letter-spacing:4px}
+    header .tag{display:none}
+    nav button{font-size:13px;letter-spacing:2px;min-width:80px}
+  }
+</style>
+</head>
+<body>
+
+<header class="panel">
+  <canvas class="mark" id="logoCv" width="120" height="120"></canvas>
+  <div>
+    <h1>燎原軍議</h1>
+    <p>三國志戰略版(台港澳服)｜配將 × 模擬對戰 × 回合優劣曲線 × AI 軍師</p>
+  </div>
+  <span class="tag num">v6.0 · 六系兵書+紅度</span>
+</header>
+
+<nav>
+  <button data-tab="build" class="on">配 將</button>
+  <button data-tab="sim">模擬對戰</button>
+  <button data-tab="ai">AI 軍師</button>
+  <button data-tab="dex">武將圖鑑</button>
+</nav>
+
+<!-- ===== 配將 ===== -->
+<section id="tab-build" class="on">
+  <div class="team-head panel">
+    <div class="cost" id="myCost">我方統御<b class="num">0</b>/ <input type="number" id="costCap" value="20" min="10" max="30" class="num"></div>
+    <div><label class="hint" style="margin:0">套用範本:</label>
+      <select id="myPresetSel"></select></div>
+  </div>
+  <div class="slots" id="mySlots"></div>
+  <p class="hint">武將庫共 197 名:適性/戰法/描述/頭像取自 <b>ejoy 官網</b>,五星數值為 <b>Lv50 滿級面板</b>(sgsdeck.com)、Cost/星級同源;四星數值與少數台服新武將為估計值,可到「武將圖鑑」點武將直接編輯。敵方與我方皆可一鍵套用 <b>PK-S26</b> 全部 108 套推薦隊伍(sgsdeck,含實戰兵書配置);兵書分六大系(每人限選同系 1 大 + 2 小,照官方週年前瞻),效果為近似期望值;紅度 +1~+5 每星給 10 點自由屬性;藤甲兵隊伍受火屬性戰法(名稱含火/焰/熾/燒/焚/燎)傷害 ×1.6;<b>圖片網址</b>欄位填入後即改用自訂頭像。隊伍與修改皆自動儲存於瀏覽器。</p>
+</section>
+
+<!-- ===== 模擬 ===== -->
+<section id="tab-sim">
+  <h2>敵方隊伍</h2>
+  <div class="team-head panel">
+    <div class="cost" id="foeCost">敵方統御<b class="num">0</b></div>
+    <div><label class="hint" style="margin:0">套用範本:</label>
+      <select id="presetSel"></select></div>
+  </div>
+  <div class="slots" id="foeSlots"></div>
+
+  <div class="battle-bar">
+    <button id="fightBtn">開 戰</button>
+    <label>模擬場數
+      <select id="simN" class="num">
+        <option value="50">50</option>
+        <option value="200" selected>200</option>
+        <option value="500">500</option>
+        <option value="1000">1000</option>
+      </select>
+    </label>
+    <span class="hint" id="simMsg"></span>
+  </div>
+
+  <div id="result" class="panel">
+    <div class="winline" id="winline"></div>
+    <canvas id="chart" width="1000" height="440"></canvas>
+    <div class="legend">
+      <span><i style="background:#4ade80;box-shadow:0 0 6px #4ade80"></i>我方總兵力(平均)</span>
+      <span><i style="background:#f87171;box-shadow:0 0 6px #f87171"></i>敵方總兵力(平均)</span>
+      <span><i style="background:#e8b34b"></i>優劣差(我−敵)</span>
+    </div>
+    <div id="roundlog"></div>
+  </div>
+</section>
+
+<!-- ===== AI 軍師 ===== -->
+<section id="tab-ai">
+  <h2>API 設定</h2>
+  <div class="keyrow panel">
+    <label class="hint" style="margin:0">AI 供應商</label>
+    <select id="aiProvider">
+      <option value="gemini" selected>Google Gemini(免費)</option>
+      <option value="claude">Anthropic Claude</option>
+    </select>
+    <label class="hint" style="margin:0">Gemini API Key</label>
+    <input type="password" id="geminiKey" placeholder="至 aistudio.google.com 免費申請 AIza…">
+    <label class="hint" style="margin:0">Anthropic Key</label>
+    <input type="password" id="apiKey" placeholder="用 Claude 才需填(claude.ai 預覽可留空)">
+    <span class="hint" style="margin:0">Key 僅存於你的瀏覽器 localStorage,不會上傳</span>
+  </div>
+
+  <h2>我擁有的武將(點選)</h2>
+  <div class="ownlist panel" id="ownList"></div>
+  <div class="ai-actions">
+    <button class="btn2" id="ownAll">全選</button>
+    <button class="btn2" id="ownNone">清除</button>
+    <button class="btn2" id="ownFromTeam">載入我方隊伍</button>
+    <button class="btn-cta" id="aiSuggest">⚔ 請 AI 軍師配將</button>
+    <button class="btn-cta" id="aiReview" style="border-color:var(--gold);color:#ffe9c0;box-shadow:0 0 16px #e8b34b33">點評我方隊伍</button>
+    <span class="hint" id="aiMsg" style="margin:0"></span>
+  </div>
+  <div id="aiOut" class="panel"></div>
+  <p class="hint">AI 依你勾選的卡池與內建戰法池給出 2–3 套陣容與理由。建議僅供參考,實際強度依賽季環境而定。</p>
+</section>
+
+<!-- ===== 圖鑑 ===== -->
+<section id="tab-dex">
+  <div class="bar">
+    <button class="fxbtn on" data-fx="全">全部</button>
+    <button class="fxbtn" data-fx="魏">魏</button>
+    <button class="fxbtn" data-fx="蜀">蜀</button>
+    <button class="fxbtn" data-fx="吳">吳</button>
+    <button class="fxbtn" data-fx="群">群</button>
+    <span class="hint" style="margin:0 0 0 auto">點擊武將卡可編輯數值/圖片</span>
+  </div>
+  <div class="dex" id="dexGrid"></div>
+</section>
+
+<!-- 選將視窗 -->
+<div id="picker" class="modal">
+  <div class="inner panel">
+    <div class="bar">
+      <button data-pf="全" class="on">全部</button>
+      <button data-pf="魏">魏</button>
+      <button data-pf="蜀">蜀</button>
+      <button data-pf="吳">吳</button>
+      <button data-pf="群">群</button>
+      <input id="pickSearch" placeholder="搜尋武將名…">
+    </div>
+    <div class="genlist" id="pickList"></div>
+    <button class="closebtn" id="pickClose">關 閉</button>
+  </div>
+</div>
+
+<!-- 編輯視窗 -->
+<div id="editor" class="modal">
+  <div class="inner panel">
+    <h2 id="edTitle" style="margin-top:0">編輯武將</h2>
+    <div class="edrow"><label>武力</label><input type="number" id="edWu" class="num"></div>
+    <div class="edrow"><label>智力</label><input type="number" id="edZhi" class="num"></div>
+    <div class="edrow"><label>統率</label><input type="number" id="edTong" class="num"></div>
+    <div class="edrow"><label>速度</label><input type="number" id="edSu" class="num"></div>
+    <div class="edrow"><label>統御 Cost</label><input type="number" id="edCost" class="num"></div>
+    <div class="edrow"><label>自帶戰法發動率</label><input type="number" id="edRate" step="0.05" min="0" max="1" class="num"></div>
+    <div class="edrow"><label>圖片網址(選填)</label><input type="text" id="edImg" placeholder="https://…"></div>
+    <div class="ed-actions">
+      <button class="btn2" id="edReset">還原預設</button>
+      <button class="btn2" id="edCancel">取消</button>
+      <button class="btn-cta" id="edSave">儲 存</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  非官方粉絲工具,與靈犀互娛/光榮特庫摩無關。武將數值與戰法效果為社群整理之近似示意值,模擬結果僅供趨勢參考,不代表遊戲內實際戰報。官網庫武將預設顯示官方頭像(連結自官方 CDN),其餘為程式生成之水墨風格圖。API Key 僅儲存於本機瀏覽器,不會上傳到任何第三方。
+</footer>
+
+<script>
+/* =====================================================
+   資料區:武將(近似示意值,可在圖鑑內編輯)
+   n名 f陣營 s星 c統御 wu武 zhi智 tong統 su速
+   apt兵種適性 tac自帶戰法 img自訂圖片(選填)
+===================================================== */
+/* ===== 資料來源:ejoy 官網武將庫(112名:適性/戰法/描述/頭像) + sgsdeck.com(5星數值/Cost/星級、
+   新武將、PK-S26 推薦隊伍),2026-07 抓取。4星數值與部分新武將為估計,可於圖鑑編輯 ===== */
+const GENERALS = [
+ {n:"曹操",f:"魏",s:5,c:7,wu:137,zhi:186,tong:231,su:122,apt:{騎:"S",槍:"A",弓:"A",盾:"S",器:"B"},tac:{name:"亂世奸雄",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:2},desc:"戰鬥中，使友軍群體（2人）造成的兵刃傷害和謀略傷害提高8%（受智力影響），自己受到的兵刃傷害和謀略傷害降低9%（受智",inh:"夢中弒臣",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543365994133512.png"},
+ {n:"孫權",f:"吳",s:5,c:6,wu:151,zhi:156,tong:162,su:118,apt:{騎:"S",槍:"A",弓:"S",盾:"B",器:"C"},tac:{name:"坐斷東南",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，自身及友軍單體成功發動普通攻擊後，自身有37.5%機率隨機獲得連擊、洞察、先攻、必中、破陣狀態的一種，持續2",inh:"臥薪嚐膽",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543365260130304.png"},
+ {n:"劉備",f:"蜀",s:5,c:7,wu:144,zhi:160,tong:178,su:92,apt:{騎:"S",槍:"A",弓:"A",盾:"S",器:"C"},tac:{name:"仁德載世",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.34,aoe:2},desc:"每回合治療我軍群體（2人，治療率34%，受智力影響），並使其受到傷害降低4%，持續1回合，且有5%機率對敵軍單體施加",inh:"義心昭烈",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543367881570312.png"},
+ {n:"張飛",f:"蜀",s:5,c:6,wu:230,zhi:41,tong:177,su:132,apt:{騎:"A",槍:"S",弓:"C",盾:"S",器:"C"},tac:{name:"燕人咆哮",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.52,aoe:3,ctrl:0.35},desc:"戰鬥第2、4回合，對敵軍全體造成兵刃攻擊（傷害率52%）；若目標處於繳械狀態，則額外使目標統率降低25%，持續2回合",inh:"瞋目橫矛",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543349367912453.png"},
+ {n:"關羽",f:"蜀",s:5,c:7,wu:228,zhi:130,tong:197,su:138,apt:{騎:"S",槍:"S",弓:"C",盾:"A",器:"C"},tac:{name:"威震華夏",type:"主動",rate:0.5,kind:"dmg",stat:"wu",pow:0.73,aoe:3,ctrl:0.35},desc:"準備1回合，對敵軍全體進行猛攻（傷害率73%），使其有50%機率進入繳械（無法進行普通攻擊）、計窮（無法發動主動戰法",inh:"橫掃千軍",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543356213016580.png"},
+ {n:"賈詡",f:"魏",s:5,c:7,wu:59,zhi:227,tong:175,su:73,apt:{騎:"S",槍:"C",弓:"S",盾:"A",器:"A"},tac:{name:"神機莫測",type:"主動",rate:0.25,kind:"dmg",stat:"zhi",pow:0.875,aoe:1,ctrl:0.35},desc:"使敵軍單體混亂2回合，並對自身外的敵我全體依次判定：若未混亂則有25%機率使其混亂2回合；友軍已混亂時，解除其負面狀",inh:"偽書相間",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543376421173255.png"},
+ {n:"郝昭",f:"魏",s:5,c:6,wu:170,zhi:160,tong:182,su:77,apt:{騎:"B",槍:"B",弓:"A",盾:"S",器:"S"},tac:{name:"金城湯池",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.49,aoe:2},desc:"無法發動普通攻擊（無法被淨化），每2回合輪流執行:治療我軍群體（2人，治療率49%，受智力影響）；對敵軍群體造成兵刃",inh:"橫戈躍馬",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543374659565570.png"},
+ {n:"魯肅",f:"吳",s:5,c:6,wu:75,zhi:193,tong:155,su:115,apt:{騎:"B",槍:"A",弓:"A",盾:"A",器:"A"},tac:{name:"濟貧好施",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:1.4,aoe:1},desc:"戰鬥第2回合時，將自身屬性的20%移交給兵力最低友軍，第3-5回合時，恢復我軍兵力最低單體（治療率142%，受智力影",inh:"奇計良謀",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543348336113664.png"},
+ {n:"蔣琬",f:"蜀",s:4,c:3,wu:88,zhi:180,tong:163,su:123,apt:{騎:"B",槍:"C",弓:"S",盾:"C",器:"S"},tac:{name:"克遵畫一",type:"內政",rate:0,kind:"none"},desc:"武將委任為採石官時，石料產量提升1.5%",inh:"奇計良謀",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543367533443076.png"},
+ {n:"凌統",f:"吳",s:5,c:6,wu:186,zhi:108,tong:151,su:140,apt:{騎:"S",槍:"A",弓:"C",盾:"B",器:"C"},tac:{name:"國士將風",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:1},desc:"戰鬥前3回合，使自己及友軍單體獲得先攻（優先行動）和必中（無視規避狀態命中目標）狀態，造成的傷害提高10%（受速度影",inh:"橫戈躍馬",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543351104354312.png"},
+ {n:"木鹿大王",f:"群",s:5,c:5,wu:158,zhi:57,tong:143,su:94,apt:{騎:"S",槍:"A",弓:"C",盾:"C",器:"C"},tac:{name:"象兵",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"將騎兵進階為橫行無忌的象兵:部隊基礎攻城值提高25%但行軍速度降低50%，將受到傷害的25%延後於3回合內逐步結算",inh:"象兵",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543373510326277.png"},
+ {n:"司馬懿",f:"魏",s:5,c:7,wu:84,zhi:229,tong:199,su:79,apt:{騎:"A",槍:"S",弓:"A",盾:"S",器:"A"},tac:{name:"鷹視狼顧",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:0.77,aoe:1},desc:"戰鬥前4回合，每回合有80%機率使自身獲得3.5%攻心或奇謀機率（每種效果最多疊加2次）；第5回合起，每回合有80%",inh:"用武通神",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543347321092099.png"},
+ {n:"張遼",f:"魏",s:5,c:7,wu:211,zhi:141,tong:178,su:151,apt:{騎:"S",槍:"S",弓:"B",盾:"A",器:"B"},tac:{name:"陷陣突襲",type:"主動",rate:0.34,kind:"dmg",stat:"wu",pow:0.475,aoe:1},desc:"戰鬥中，使自己的普通攻擊目標有34%機率鎖定為敵軍主將，自身突擊戰法的發動機率提高7.5%並使自己成功發動突擊戰法後",inh:"勇者得前",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543361015494660.png"},
+ {n:"龐統",f:"蜀",s:5,c:7,wu:59,zhi:225,tong:150,su:73,apt:{騎:"C",槍:"A",弓:"S",盾:"B",器:"B"},tac:{name:"連環計",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:0.78,aoe:3},desc:"準備1回合，對敵軍全體施放鐵索連環，使其任一目標受到傷害時會反饋7.5%（受智力影響）傷害給其他單位，持續2回合",inh:"乘敵不虞",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543370196826121.png"},
+ {n:"孫尚香",f:"吳",s:5,c:7,wu:203,zhi:128,tong:143,su:137,apt:{騎:"S",槍:"A",弓:"S",盾:"B",器:"C"},tac:{name:"弓腰姬",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.61,aoe:1},desc:"發動普通攻擊前對敵軍單體造成兵刃傷害（傷害率61%），自身擁有功能性增益狀態時額外對其造成兵刃傷害（傷害率10%×狀",inh:"結盟",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543361384593417.png"},
+ {n:"張紘",f:"吳",s:4,c:3,wu:66,zhi:176,tong:145,su:123,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"A"},tac:{name:"奇施經略",type:"內政",rate:0,kind:"none"},desc:"武將委任為稅務官時，銅幣產量提升1.5%",inh:"智計",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543351439898627.png"},
+ {n:"馬雲祿",f:"蜀",s:5,c:6,wu:179,zhi:104,tong:155,su:92,apt:{騎:"S",槍:"A",弓:"B",盾:"C",器:"C"},tac:{name:"鴟苕鳳姿",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"普通攻擊傷害提高30%(受目標損失兵力影響），戰鬥第5回合時，鎖定敵方兵力最低單體直到戰鬥結束，並且普通攻擊時有35",inh:"乘敵不虞",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543370561730565.png"},
+ {n:"張姬",f:"蜀",s:5,c:4,wu:121,zhi:89,tong:71,su:134,apt:{騎:"A",槍:"S",弓:"B",盾:"B",器:"C"},tac:{name:"奮矛英姿",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"每次普通攻擊後，降低敵方7.5統率，將其轉化為自身的武力，直到戰鬥結束，每第4次普通攻擊時，傷害提高50%並對敵軍全",inh:"勇者得前",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543352454920198.png"},
+ {n:"陳宮",f:"群",s:5,c:4,wu:76,zhi:182,tong:156,su:83,apt:{騎:"A",槍:"A",弓:"S",盾:"B",器:"A"},tac:{name:"百計多謀",type:"主動",rate:0.5,kind:"dmg",stat:"wu",pow:0.7,aoe:1},desc:"戰鬥中，每回合都有50%機率使隨機敵軍單體產生逃兵（傷害率70%，受智力影響，無視防禦）",inh:"智計",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543364471601154.png"},
+ {n:"陸抗",f:"吳",s:5,c:6,wu:96,zhi:187,tong:190,su:81,apt:{騎:"A",槍:"A",弓:"S",盾:"B",器:"S"},tac:{name:"校勝帷幄",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:1},desc:"戰鬥中，提高己方主將7%奇謀機率（受智力影響，觸發時謀略傷害提高100%）及20%奇謀傷害，同時為己方主將分擔15%",inh:"乘勝長驅",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543363737597952.png"},
+ {n:"周泰",f:"吳",s:5,c:6,wu:185,zhi:86,tong:186,su:94,apt:{騎:"S",槍:"A",弓:"A",盾:"S",器:"C"},tac:{name:"肉身鐵壁",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，為友軍承擔（15%，友軍主將為30%）的傷害結果（承擔的兵刃傷害額外受自身統率影響降低），當友軍兵力高於70",inh:"一力拒守",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543343307143173.png"},
+ {n:"荀攸",f:"魏",s:5,c:6,wu:35,zhi:210,tong:159,su:82,apt:{騎:"S",槍:"C",弓:"S",盾:"B",器:"B"},tac:{name:"十二奇策",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:0.51,aoe:2},desc:"移除敵軍群體（1-2）人增益狀態，提高我軍全體1回合3%主動戰法發動率（受智力影響）並使其下次發動主動戰法後，對敵軍",inh:"運籌決算",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543357722966016.png"},
+ {n:"姜維",f:"蜀",s:5,c:6,wu:187,zhi:189,tong:192,su:113,apt:{騎:"S",槍:"A",弓:"S",盾:"A",器:"C"},tac:{name:"義膽雄心",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，奇數回合會對敵軍單體造成92%兵刃傷害並降低武力32點，持續2回合，偶數回合會對敵軍群體（2人）造成38%謀",inh:"形機軍略",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543357286758405.png"},
+ {n:"高覽",f:"群",s:5,c:5,wu:183,zhi:121,tong:143,su:104,apt:{騎:"A",槍:"S",弓:"B",盾:"A",器:"C"},tac:{name:"振軍擊營",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.175,aoe:1},desc:"對敵軍單體造成兵刃傷害（傷害率117.5%）及禁療（無法恢復兵力）狀態，持續3回合，並使有負面狀態的友軍單體自帶戰法",inh:"乘勝長驅",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543353138591750.png"},
+ {n:"張春華",f:"魏",s:5,c:3,wu:69,zhi:176,tong:126,su:79,apt:{騎:"A",槍:"C",弓:"A",盾:"A",器:"B"},tac:{name:"沉斷機謀",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:0.78,aoe:2},desc:"使敵軍群體（2人）統率、智力降低30%，持續2回合，並造成謀略傷害（傷害率78%，受智力影響）",inh:"運籌決算",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543355881666564.png"},
+ {n:"嚴顏",f:"蜀",s:5,c:6,wu:171,zhi:139,tong:172,su:91,apt:{騎:"B",槍:"A",弓:"S",盾:"A",器:"B"},tac:{name:"誓守無降",type:"主動",rate:0.4,kind:"ctrl",stat:"zhi",pow:0.18,aoe:2,ctrl:0.35},desc:"準備1回合，使我軍群體（2人）進入洞察（免疫所有控制效果）狀態，持續2回合，並使自身2回合內受到下一次謀略傷害時，計",inh:"一力拒守",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543362194094085.png"},
+ {n:"袁術",f:"群",s:5,c:6,wu:161,zhi:161,tong:133,su:119,apt:{騎:"S",槍:"B",弓:"S",盾:"B",器:"C"},tac:{name:"符命自立",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥前2回合中任一回合，自身獲得玉璽，提高50%會心機率及奇謀機率，每回合逐漸降低，直至第8回合降至0",inh:"形機軍略",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543369852893185.png"},
+ {n:"呂布",f:"群",s:5,c:7,wu:249,zhi:39,tong:166,su:143,apt:{騎:"S",槍:"A",弓:"S",盾:"B",器:"C"},tac:{name:"天下無雙",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:1},desc:"對敵軍單體發起決鬥，決鬥雙方輪流向對方普通攻擊3次，自己率先出手。決鬥途中，雙方不受繳械和震懾狀態影響",inh:"一騎當千",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543366761691140.png"},
+ {n:"趙雲",f:"蜀",s:5,c:6,wu:224,zhi:124,tong:197,su:124,apt:{騎:"S",槍:"S",弓:"A",盾:"A",器:"C"},tac:{name:"一身是膽",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，使自己獲得洞察狀態（免疫所有控制效果），武力、智力、速度、統率提升20點，自身為主將時，提升值為25點",inh:"橫掃千軍",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543354501740551.png"},
+ {n:"周瑜",f:"吳",s:5,c:6,wu:94,zhi:224,tong:176,su:75,apt:{騎:"B",槍:"A",弓:"S",盾:"A",器:"C"},tac:{name:"神火計",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:0.34,aoe:3},desc:"戰鬥中，每次成功發動主動戰法時，有40%機率對敵軍全體造成謀略攻擊（傷害率34%，受智力影響）",inh:"風助火勢",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543356947019784.png"},
+ {n:"陸遜",f:"吳",s:5,c:7,wu:90,zhi:222,tong:186,su:74,apt:{騎:"C",槍:"A",弓:"S",盾:"B",器:"A"},tac:{name:"火燒連營",type:"主動",rate:0.3,kind:"dot",stat:"zhi",pow:0.41,aoe:1,ctrl:0.35},desc:"對敵軍單體施加灼燒狀態（傷害率41%，受智力影響，自身為主將時，傷害率提高至49%）,持續3回合，隨機施放2次",inh:"熯天熾地",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543375003498497.png"},
+ {n:"諸葛亮",f:"蜀",s:5,c:7,wu:58,zhi:247,tong:214,su:64,apt:{騎:"C",槍:"S",弓:"S",盾:"B",器:"S"},tac:{name:"神機妙算",type:"主動",rate:0.25,kind:"dmg",stat:"zhi",pow:1,aoe:2},desc:"敵軍群體（2人）發動主動戰法時，有25%機率令其失敗並對其造成謀略傷害（傷害率100%，受智力影響）",inh:"舌戰群儒",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543362965846018.png"},
+ {n:"孫堅",f:"吳",s:5,c:6,wu:188,zhi:120,tong:194,su:56,apt:{騎:"A",槍:"A",弓:"B",盾:"S",器:"C"},tac:{name:"江東猛虎",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"對敵軍群體（2人）造成63%兵刃傷害，並嘲諷（強迫目標普通攻擊自己），持續2回合",inh:"挫銳",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543362554804229.png"},
+ {n:"孫策",f:"吳",s:5,c:5,wu:200,zhi:126,tong:163,su:69,apt:{騎:"S",槍:"S",弓:"A",盾:"B",器:"A"},tac:{name:"江東小霸王",type:"主動",rate:0.35,kind:"dmg",stat:"wu",pow:0.96,aoe:1},desc:"戰鬥中，普通攻擊後有35%機率對目標再次發起猛攻（傷害率96%）併為我軍單體恢復兵力（治療率28%，受武力影響）",inh:"破陣摧堅",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543347656636423.png"},
+ {n:"太史慈",f:"吳",s:5,c:6,wu:195,zhi:118,tong:158,su:121,apt:{騎:"S",槍:"B",弓:"S",盾:"C",器:"C"},tac:{name:"神射",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，使自己獲得連擊狀態，每回合可以普通攻擊2次，並使普通攻擊目標統率降低5，可疊加，持續2回合",inh:"折衝禦侮",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543372042319881.png"},
+ {n:"呂蒙",f:"吳",s:5,c:6,wu:163,zhi:185,tong:157,su:66,apt:{騎:"B",槍:"S",弓:"A",盾:"B",器:"S"},tac:{name:"白衣渡江",type:"主動",rate:0.25,kind:"ctrl",pow:0,aoe:3,ctrl:0.4},desc:"戰鬥首回合我軍全體獲得1次抵禦，戰鬥中，自身造成兵刃傷害時有25%機率使敵軍單體繳械（無法進行普通攻擊），持續2回合",inh:"士別三日",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543373854259205.png"},
+ {n:"郭嘉",f:"魏",s:5,c:5,wu:25,zhi:225,tong:158,su:142,apt:{騎:"S",槍:"B",弓:"A",盾:"A",器:"B"},tac:{name:"十勝十敗",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:1},desc:"戰鬥前2回合，使我軍主將獲得洞察（免疫所有控制效果）狀態，受到的傷害降低25%",inh:"沉沙決水",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543369391519752.png"},
+ {n:"龐德",f:"魏",s:5,c:5,wu:207,zhi:116,tong:140,su:63,apt:{騎:"A",槍:"B",弓:"S",盾:"B",器:"B"},tac:{name:"抬棺決戰",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.275,aoe:2},desc:"準備1回合，移除敵軍群體（2人）的增益效果，隨後造成兵刃攻擊（傷害率127.5%）",inh:"暫避其鋒",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543345920194566.png"},
+ {n:"鍾會",f:"魏",s:5,c:6,wu:92,zhi:189,tong:174,su:137,apt:{騎:"A",槍:"A",弓:"S",盾:"B",器:"A"},tac:{name:"精練策數",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.05,aoe:2,ctrl:0.35},desc:"準備1回合，對敵軍群體（2-3人）造成謀略攻擊（傷害率105%，受智力影響），並繳械（無法進行普通攻擊），持續2回合",inh:"文武雙全",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543371689998341.png"},
+ {n:"馬超",f:"蜀",s:5,c:7,wu:227,zhi:81,tong:179,su:135,apt:{騎:"S",槍:"S",弓:"B",盾:"B",器:"B"},tac:{name:"槊血縱橫",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，使自己獲得17點武力及27%群攻（普通攻擊時對目標同部隊其他武將造成傷害）效果，自身為主將時，群攻值為30%",inh:"所向披靡",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543361804023815.png"},
+ {n:"董卓",f:"群",s:5,c:7,wu:178,zhi:139,tong:186,su:113,apt:{騎:"A",槍:"B",弓:"S",盾:"S",器:"C"},tac:{name:"酒池肉林",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.3,aoe:1},desc:"戰鬥中，每回合使自身兵力減少（1%×回合數），同時每回合獲得4%倒戈（造成兵刃傷害時，恢復自身基於傷害量的一定兵力）",inh:"暴戾無仁",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543375334848519.png"},
+ {n:"左慈",f:"群",s:5,c:5,wu:26,zhi:209,tong:80,su:53,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"C"},tac:{name:"金丹秘術",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:3},desc:"戰鬥前2回合，使我軍全體獲得17.5%規避效果，可免疫傷害，並在戰鬥第3回合開始，獲得休整狀態（每回合恢復一次兵力）",inh:"杯蛇鬼車",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543352119375878.png"},
+ {n:"甘寧",f:"吳",s:5,c:6,wu:221,zhi:98,tong:170,su:132,apt:{騎:"A",槍:"S",弓:"S",盾:"A",器:"S"},tac:{name:"錦帆百翎",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，提高自身25%會心機率（觸發時兵刃傷害提高100%）及10%會心傷害；自身為主將時，提高友軍群體（2人）",inh:"百騎劫營",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543347996375047.png"},
+ {n:"徐晃",f:"魏",s:5,c:6,wu:192,zhi:141,tong:163,su:97,apt:{騎:"A",槍:"A",弓:"C",盾:"S",器:"B"},tac:{name:"長驅直入",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，每次造成兵刃傷害後，使自己造成的兵刃傷害提升7.5%，最大疊加5次",inh:"合軍聚眾",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543368288417801.png"},
+ {n:"黃忠",f:"蜀",s:5,c:6,wu:206,zhi:117,tong:171,su:92,apt:{騎:"A",槍:"A",弓:"S",盾:"S",器:"C"},tac:{name:"百步穿楊",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.9,aoe:1},desc:"準備1回合，提高自身12.5%會心機率（觸發時兵刃傷害提高100%），持續2回合，隨後對敵軍全體造成兵刃傷害",inh:"萬箭齊發",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543359149029379.png"},
+ {n:"典韋",f:"魏",s:5,c:6,wu:223,zhi:44,tong:162,su:133,apt:{騎:"B",槍:"A",弓:"C",盾:"S",器:"C"},tac:{name:"古之惡來",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.4,aoe:1},desc:"我軍主將即將受到普通攻擊時,自身會對攻擊者進行一次猛擊(傷害率40%)並使其造成兵刃傷害降低9%，持續1回合",inh:"折衝禦侮",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543349019785220.png"},
+ {n:"夏侯惇",f:"魏",s:5,c:6,wu:193,zhi:104,tong:193,su:124,apt:{騎:"S",槍:"A",弓:"C",盾:"A",器:"B"},tac:{name:"剛烈不屈",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.42,aoe:2},desc:"戰鬥中，使自己統率提升19點，受到兵刃傷害時有40%機率對敵軍群體（2人）造成兵刃傷害（傷害率42%）",inh:"絕地反擊",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543345400100873.png"},
+ {n:"黃月英",f:"蜀",s:5,c:4,wu:54,zhi:186,tong:124,su:118,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"S"},tac:{name:"工神",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥前3回合，使我軍全體獲得先攻（優先行動）狀態，我軍主將造成傷害提升15%，我軍副將造成傷害提升7.5%",inh:"鋒矢陣",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543377159370758.png"},
+ {n:"華佗",f:"群",s:5,c:5,wu:31,zhi:182,tong:104,su:139,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"C"},tac:{name:"青囊",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.44,aoe:2},desc:"戰鬥前4回合，使我軍群體（2人）獲得20統率（受智力影響）及急救效果，每次受到傷害時有50%機率回覆一定兵力",inh:"刮骨療毒",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543358452774917.png"},
+ {n:"法正",f:"蜀",s:5,c:4,wu:63,zhi:196,tong:131,su:104,apt:{騎:"B",槍:"A",弓:"A",盾:"S",器:"A"},tac:{name:"以逸待勞",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.77,aoe:2},desc:"治療我軍群體（2人，治療率77%，受智力影響），並使其下3次受到傷害分別降低（25%、18.8%、12.5%）",inh:"沉沙決水",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543350051584006.png"},
+ {n:"司馬徽",f:"群",s:4,c:3,wu:44,zhi:189,tong:132,su:119,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"水鏡先生",type:"內政",rate:0,kind:"none"},desc:"武將委任為尋訪使時，提升尋出高階獎勵的機率4.5%",inh:"誘敵深入",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543369035003909.png"},
+ {n:"顏良",f:"群",s:5,c:5,wu:197,zhi:50,tong:150,su:94,apt:{騎:"A",槍:"S",弓:"B",盾:"A",器:"C"},tac:{name:"勇冠三軍",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.9,aoe:1,ctrl:0.35},desc:"普通攻擊之後，對攻擊目標再次發起猛攻（傷害率90%），並使其進入震懾狀態（無法行動），持續1回合",inh:"盛氣凌敵",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543353469941769.png"},
+ {n:"于吉",f:"群",s:5,c:7,wu:16,zhi:194,tong:102,su:56,apt:{騎:"C",槍:"C",弓:"C",盾:"B",器:"C"},tac:{name:"興雲佈雨",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.36,aoe:3},desc:"戰鬥第2回合開始，使敵軍全體進入水攻狀態，每回合持續造成傷害（傷害率36%，受智力影響），並使其受到傷害增加5%",inh:"杯蛇鬼車",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543348675852296.png"},
+ {n:"張角",f:"群",s:5,c:6,wu:45,zhi:203,tong:156,su:63,apt:{騎:"A",槍:"B",弓:"S",盾:"S",器:"A"},tac:{name:"五雷轟頂",type:"主動",rate:0.3,kind:"dmg",stat:"zhi",pow:0.68,aoe:1,ctrl:0.35},desc:"準備1回合，對敵軍隨機單體造成謀略攻擊（傷害率68%，受智力影響）並由30%機率使其進入震懾狀態（無法行動）",inh:"黃天泰平",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543351783831554.png"},
+ {n:"大喬",f:"吳",s:5,c:4,wu:53,zhi:185,tong:154,su:136,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"國色",type:"內政",rate:0,kind:"none"},desc:"武將委任為貿易官時，貿易比例提升1.5%",inh:"魅惑",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543349716039687.png"},
+ {n:"小喬",f:"吳",s:5,c:4,wu:48,zhi:189,tong:150,su:141,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"天香",type:"內政",rate:0,kind:"none"},desc:"提升武將13.5%魅力",inh:"奪魂挾魄",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543360667367424.png"},
+ {n:"程普",f:"吳",s:5,c:5,wu:137,zhi:150,tong:185,su:96,apt:{騎:"B",槍:"S",弓:"A",盾:"A",器:"B"},tac:{name:"勇烈持重",type:"主動",rate:0.2,kind:"ctrl",pow:0,aoe:1,ctrl:0.4},desc:"受到傷害時，有20%機率淨化自己負面效果，同時使隨機敵軍進入震懾狀態（無法行動），持續1回合",inh:"克敵制勝",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543359895615496.png"},
+ {n:"華雄",f:"群",s:5,c:5,wu:209,zhi:101,tong:154,su:130,apt:{騎:"S",槍:"A",弓:"B",盾:"B",器:"C"},tac:{name:"搦戰群雄",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1,aoe:2},desc:"準備1回合，對敵軍群體（2人）造成一次兵刃攻擊（傷害率100%），隨後使自己造成兵刃傷害提高12.5%",inh:"誘敵深入",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543374311438345.png"},
+ {n:"荀彧",f:"魏",s:5,c:5,wu:70,zhi:209,tong:189,su:136,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"王佐之才",type:"內政",rate:0,kind:"none"},desc:"提升武將36政治",inh:"四面楚歌",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543346268321796.png"},
+ {n:"程昱",f:"魏",s:5,c:6,wu:69,zhi:204,tong:137,su:73,apt:{騎:"S",槍:"C",弓:"A",盾:"C",器:"A"},tac:{name:"十面埋伏",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:0.48,aoe:2},desc:"對有負面狀態的敵軍造成謀略攻擊（傷害率48%，受智力影響），隨後對敵軍群體（2人）施加禁療（無法恢復兵力）及叛逃狀態",inh:"守而必固",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543359488768005.png"},
+ {n:"甄姬",f:"魏",s:5,c:4,wu:62,zhi:198,tong:167,su:141,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"花容月貌",type:"內政",rate:0,kind:"none"},desc:"武將委任為練兵使時，練兵獲得經驗提升3%",inh:"魅惑",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543352798853122.png"},
+ {n:"夏侯淵",f:"魏",s:5,c:5,wu:207,zhi:109,tong:153,su:140,apt:{騎:"S",槍:"B",弓:"S",盾:"B",器:"A"},tac:{name:"將行其疾",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.58,aoe:1,ctrl:0.35},desc:"普通攻擊之後，對隨機敵軍單體發動一次兵刃攻擊（傷害率158%）；若命中敵軍主將，則使其進入計窮（無法發動主動戰法）狀",inh:"萬箭齊發",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543372797294594.png"},
+ {n:"曹仁",f:"魏",s:5,c:6,wu:148,zhi:112,tong:202,su:44,apt:{騎:"A",槍:"A",弓:"B",盾:"S",器:"C"},tac:{name:"固若金湯",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"使自己獲得洞察（免疫所有控制效果）狀態並嘲諷（強迫目標普通攻擊自己）敵軍全體，同時提高自身75統率，持續2回合",inh:"八門金鎖陣",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543350756227072.png"},
+ {n:"張昭",f:"吳",s:4,c:3,wu:57,zhi:185,tong:158,su:119,apt:{騎:"C",槍:"B",弓:"C",盾:"C",器:"C"},tac:{name:"功勳克舉",type:"內政",rate:0,kind:"none"},desc:"武將委任為主政官時，全資源產量提升1.3%",inh:"兵鋒",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543363309778945.png"},
+ {n:"鄧艾",f:"魏",s:5,c:5,wu:172,zhi:177,tong:186,su:128,apt:{騎:"A",槍:"S",弓:"A",盾:"B",器:"S"},tac:{name:"暗渡陳倉",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:2.6,aoe:1,ctrl:0.35},desc:"準備1回合，對敵軍單體造成謀略攻擊（傷害率260%，受智力影響）並使其進入震懾狀態（無法行動），持續2回合",inh:"文武雙全",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543365595674633.png"},
+ {n:"樂進",f:"魏",s:5,c:5,wu:186,zhi:91,tong:167,su:115,apt:{騎:"S",槍:"S",弓:"B",盾:"A",器:"S"},tac:{name:"臨戰先登",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.75,aoe:2,ctrl:0.35},desc:"對敵軍群體（2人）造成兵刃攻擊（傷害率75%），之後自己進入虛弱狀態（無法造成傷害），持續1回合",inh:"鋒矢陣",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543367109818373.png"},
+ {n:"于禁",f:"魏",s:5,c:5,wu:176,zhi:116,tong:139,su:64,apt:{騎:"A",槍:"A",弓:"B",盾:"S",器:"C"},tac:{name:"持軍毅重",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.92,aoe:1},desc:"使自己下次受到兵刃傷害提高40%，持續一回合，提高自身28點武力，持續3回合，並對敵軍群體（2人）造成猛烈一擊",inh:"克敵制勝",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543371362842626.png"},
+ {n:"張郃",f:"魏",s:5,c:6,wu:190,zhi:119,tong:159,su:60,apt:{騎:"A",槍:"S",弓:"B",盾:"S",器:"A"},tac:{name:"大戟士",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"將槍兵進階為橫衝直撞的大戟士：我軍全體武力提高7點，進行普通攻擊時，有35%機率對敵軍單體造成兵刃傷害（傷害率61%",inh:"大戟士",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543366371620873.png"},
+ {n:"許褚",f:"魏",s:5,c:6,wu:226,zhi:54,tong:148,su:123,apt:{騎:"A",槍:"S",弓:"B",盾:"S",器:"C"},tac:{name:"虎痴",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，每回合選擇一名敵軍單體，自身發動的所有攻擊都會鎖定該目標，對其造成的傷害提高16.5%",inh:"所向披靡",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543353813874694.png"},
+ {n:"袁紹",f:"群",s:5,c:6,wu:159,zhi:151,tong:171,su:113,apt:{騎:"B",槍:"B",弓:"S",盾:"A",器:"S"},tac:{name:"累世立名",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.63,aoe:2},desc:"準備1回合，對敵軍群體（2人）造成一次兵刃攻擊（傷害率63%），降低其12統率（受武力影響）並附加灼燒狀態",inh:"合軍聚眾",img:"https://cloud.lingxigames.com/2022/3/7/685506778040037381.png"},
+ {n:"徐庶",f:"蜀",s:5,c:5,wu:79,zhi:207,tong:150,su:73,apt:{騎:"S",槍:"B",弓:"A",盾:"B",器:"B"},tac:{name:"處茲不惑",type:"主動",rate:0.3,kind:"dot",stat:"wu",pow:0.7,aoe:2},desc:"使敵軍群體（2人）有30%機率隨機獲得灼燒（受智力影響）、中毒（受智力影響）、潰逃（受武力影響）狀態",inh:"暫避其鋒",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543364077336584.png"},
+ {n:"貂蟬",f:"群",s:5,c:4,wu:48,zhi:178,tong:113,su:142,apt:{騎:"B",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"閉月",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:1},desc:"選擇一名敵軍為自身分擔12.5%（受智力影響）傷害，且當目標為敵軍武力最高時進入混亂（攻擊和戰法無差別選擇目標）狀態",inh:"傾國傾城",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543360256325633.png"},
+ {n:"蔡文姬",f:"群",s:5,c:3,wu:24,zhi:170,tong:142,su:135,apt:{騎:"B",槍:"C",弓:"C",盾:"C",器:"C"},tac:{name:"胡笳餘音",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.61,aoe:2},desc:"治療我軍群體（2人，治療率61%，受智力影響）並有50%機率使自身及友軍單位造成傷害提高13%（受智力影響）",inh:"奪魂挾魄",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543358096259081.png"},
+ {n:"馬騰",f:"群",s:5,c:5,wu:167,zhi:82,tong:141,su:99,apt:{騎:"S",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"西涼鐵騎",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"將騎兵進階為橫行天下的西涼鐵騎:戰鬥前3回合，提高我軍全體12.5%會心機率（觸發時兵刃傷害提高100%）",inh:"西涼鐵騎",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543372394641411.png"},
+ {n:"曹純",f:"魏",s:5,c:5,wu:155,zhi:102,tong:141,su:75,apt:{騎:"S",槍:"B",弓:"B",盾:"C",器:"C"},tac:{name:"虎豹騎",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"將騎兵進階為天下驍銳的虎豹騎:我軍全體提高20武力，戰鬥前3回合，我軍全體突擊戰法發動率提高5%",inh:"虎豹騎",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543346612254726.png"},
+ {n:"孟獲",f:"群",s:5,c:7,wu:186,zhi:71,tong:186,su:94,apt:{騎:"S",槍:"A",弓:"B",盾:"S",器:"C"},tac:{name:"南蠻渠魁",type:"主動",rate:0.245,kind:"dmg",stat:"wu",pow:0.53,aoe:3,ctrl:0.35},desc:"戰鬥中，每回合行動時有24.5%機率對敵軍全體造成兵刃傷害（傷害率53%），若未生效則提高7%發動機率",inh:"兵鋒",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543344682874883.png"},
+ {n:"公孫瓚",f:"群",s:5,c:6,wu:175,zhi:154,tong:163,su:144,apt:{騎:"S",槍:"C",弓:"S",盾:"C",器:"B"},tac:{name:"白馬義從",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"將弓兵進階為弓馬嫻熟的白馬義從:部隊行軍速度提高25%，我軍全體戰鬥前2回合獲得先攻（優先行動）並提高5%主動戰法發",inh:"白馬義從",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543373137033222.png"},
+ {n:"陳到",f:"蜀",s:5,c:6,wu:150,zhi:144,tong:111,su:100,apt:{騎:"C",槍:"S",弓:"B",盾:"B",器:"B"},tac:{name:"白毦兵",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"將槍兵進階為攻無不破的白毦兵:我軍全體戰鬥中普通攻擊後有20%機率對攻擊目標再次發起一次謀略攻擊（傷害率55%）",inh:"白毦兵",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543364840699912.png"},
+ {n:"王平",f:"蜀",s:5,c:5,wu:143,zhi:137,tong:154,su:97,apt:{騎:"B",槍:"C",弓:"S",盾:"B",器:"C"},tac:{name:"無當飛軍",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"將弓兵進階為矢不虛發的無當飛軍:我軍全體統率、速度提高11點，首回合對敵軍群體（2人）施加中毒狀態",inh:"無當飛軍",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543375712335880.png"},
+ {n:"兀突骨",f:"群",s:5,c:6,wu:175,zhi:1,tong:193,su:45,apt:{騎:"S",槍:"B",弓:"C",盾:"S",器:"C"},tac:{name:"藤甲兵",type:"兵種",rate:1,kind:"tengjia",pow:0.15,aoe:3},desc:"將盾兵進階為刀槍不入的藤甲兵:我軍全體受到兵刃傷害降低12%（受統率影響），但處於灼燒狀態時每回合額外損失兵力",inh:"藤甲兵",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543355197995016.png"},
+ {n:"文醜",f:"群",s:5,c:5,wu:192,zhi:82,tong:153,su:95,apt:{騎:"A",槍:"A",弓:"S",盾:"A",器:"C"},tac:{name:"登鋒陷陣",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:1.04,aoe:1,ctrl:0.35},desc:"對目標單體造成兵刃攻擊（傷害率104%）並繳械（無法普通攻擊），同時使自己的統率降低40%，並進入禁療",inh:"破陣摧堅",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543376056268803.png"},
+ {n:"高順",f:"群",s:5,c:5,wu:169,zhi:109,tong:183,su:43,apt:{騎:"C",槍:"C",弓:"B",盾:"S",器:"S"},tac:{name:"陷陣營",type:"兵種",rate:1,kind:"shield",pow:0.15,aoe:3},desc:"將盾兵進階為無往不利的陷陣營:我軍全體武力、統率提高11點，戰鬥前3回合獲得急救狀態，受到傷害時有30%機率獲得治療",inh:"陷陣營",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543358784124934.png"},
+ {n:"曹植",f:"魏",s:4,c:3,wu:75,zhi:189,tong:145,su:128,apt:{騎:"B",槍:"C",弓:"C",盾:"B",器:"B"},tac:{name:"七步成詩",type:"內政",rate:0,kind:"none"},desc:"武將委任為鍛造官時，提升鍛造出高階裝備的機率4.5%",inh:"守而必固",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543354849867783.png"},
+ {n:"黃蓋",f:"吳",s:5,c:5,wu:152,zhi:132,tong:162,su:57,apt:{騎:"B",槍:"A",弓:"S",盾:"A",器:"B"},tac:{name:"苦肉計",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.4,aoe:1,ctrl:0.35},desc:"對自己造成兵刃傷害（傷害率40%），使敵軍單體進入灼燒（傷害率61%，受智力影響）及混亂（攻擊和戰法無差別選擇目標）",inh:"風助火勢",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543350416488456.png"},
+ {n:"曹丕",f:"魏",s:5,c:5,wu:141,zhi:189,tong:194,su:145,apt:{騎:"A",槍:"C",弓:"S",盾:"A",器:"C"},tac:{name:"戮力上國",type:"內政",rate:0,kind:"none"},desc:"委任為主政官時，城建設施升級時間降低15%",inh:"盛氣凌敵",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543376777689091.png"},
+ {n:"李儒",f:"群",s:5,c:5,wu:41,zhi:196,tong:111,su:97,apt:{騎:"S",槍:"B",弓:"A",盾:"B",器:"B"},tac:{name:"鴆毒",type:"主動",rate:0.4,kind:"dot",stat:"zhi",pow:1.13,aoe:1},desc:"對敵軍單體施加鴆酒，降低其30%武力（受智力影響），持續1回合，1回合後毒發造成謀略攻擊（傷害率113%）",inh:"四面楚歌",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543346981353476.png"},
+ {n:"陳群",f:"魏",s:4,c:3,wu:53,zhi:189,tong:163,su:114,apt:{騎:"C",槍:"C",弓:"B",盾:"B",器:"C"},tac:{name:"清流雅望",type:"內政",rate:0,kind:"none"},desc:"武將委任為冶鐵官時，鐵礦產量提升1.5%",inh:"挫銳",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543356561143810.png"},
+ {n:"祝融夫人",f:"群",s:5,c:6,wu:198,zhi:66,tong:125,su:96,apt:{騎:"S",槍:"A",弓:"A",盾:"A",器:"C"},tac:{name:"火神英風",type:"主動",rate:0.075,kind:"dot",stat:"wu",pow:0.71,aoe:3},desc:"戰鬥前2回合，對敵軍全體武將分別有7.5%機率（處於灼燒狀態的目標有35%機率）發動兵刃攻擊（傷害率71%）",inh:"兵無常勢",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543368628156425.png"},
+ {n:"呂玲綺",f:"群",s:5,c:6,wu:205,zhi:84,tong:144,su:110,apt:{騎:"S",槍:"A",弓:"S",盾:"B",器:"C"},tac:{name:"獅子奮迅",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.59,aoe:1},desc:"對敵軍單體及額外1-2名敵人造成兵刃攻擊（傷害率59%）並使自身主動戰法發動機率提高5%",inh:"絕地反擊",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543370909857796.png"},
+ {n:"田豐",f:"群",s:5,c:6,wu:44,zhi:206,tong:139,su:90,apt:{騎:"A",槍:"A",弓:"B",盾:"S",器:"A"},tac:{name:"竭忠盡智",type:"主動",rate:0.4,kind:"ctrl",stat:"wu",pow:0.18,aoe:2,ctrl:0.35},desc:"準備1回合，使敵軍群體（1-2人）速度降低15%（受智力影響）並進入混亂狀態（攻擊和戰法無差別選擇目標），持續2回合",inh:"兵無常勢",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543355533539330.png"},
+ {n:"SP袁紹",f:"群",s:5,c:7,wu:170,zhi:171,tong:179,su:113,apt:{騎:"B",槍:"B",弓:"S",盾:"A",器:"S"},tac:{name:"高櫓聯營",type:"主動",rate:0.5,kind:"dmg",stat:"wu",pow:0.41,aoe:1,ctrl:0.35},desc:"戰鬥開始時，架起箭樓，填裝10次（次數為0時將失效），每回合發射2次，有50%機率（受武力影響）額外發射1次",inh:"箕形陣",img:"https://image.aligames.com/s/y9s/g/2020/8/27/483689228696834050.png"},
+ {n:"關銀屏",f:"蜀",s:5,c:6,wu:180,zhi:79,tong:170,su:124,apt:{騎:"S",槍:"S",弓:"C",盾:"B",器:"C"},tac:{name:"將門虎女",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.64,aoe:2,ctrl:0.35},desc:"對敵軍群體（2人）造成兵刃傷害（傷害率64%）及虎嗔效果；下1回合受到額外兵刃傷害（傷害率10%）",inh:"箕形陣",img:"https://image.aligames.com/s/y9s/g/2020/8/27/483688108863803393.png"},
+ {n:"蔡邕",f:"群",s:4,c:3,wu:44,zhi:185,tong:136,su:110,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"曉知良木",type:"內政",rate:0,kind:"none"},desc:"武將委任為木材官時，木材產量提升1.5%",inh:"經術政要",img:"https://image.aligames.com/s/y9s/g/2020/8/27/483688107248996353.png"},
+ {n:"滿寵",f:"魏",s:5,c:5,wu:109,zhi:184,tong:181,su:114,apt:{騎:"A",槍:"B",弓:"A",盾:"S",器:"A"},tac:{name:"鎮扼防拒",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.96,aoe:1},desc:"每回合有50%機率（受智力影響）使我軍單體（優先選除自己之外的副將）援護所有友軍並獲得休整狀態",inh:"破軍威勝",img:"https://cloud.lingxigames.com/2022/12/7/785108559464165379.png"},
+ {n:"SP郭嘉",f:"魏",s:5,c:6,wu:26,zhi:225,tong:177,su:133,apt:{騎:"S",槍:"B",弓:"A",盾:"A",器:"B"},tac:{name:"經天緯地",type:"主動",rate:0.35,kind:"dmg",stat:"zhi",pow:0.5,aoe:3},desc:"戰鬥中，我軍全體發動主動戰法及突擊戰法時，自身有35%機率（受智力影響）會對敵軍全體發動謀略攻擊（傷害率50%）",inh:"先成其慮",img:"https://cloud.lingxigames.com/2022/12/7/785108400395186184.png"},
+ {n:"王雙",f:"魏",s:5,c:5,wu:203,zhi:32,tong:138,su:111,apt:{騎:"A",槍:"A",弓:"C",盾:"S",器:"C"},tac:{name:"震駭四境",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.89,aoe:1,ctrl:0.35},desc:"發動2次對敵軍單體的兵刃攻擊（傷害率89%），分別造成使其首次受到兵刃傷害提高15%及計窮（無法發動主動戰法）",inh:"破軍威勝",img:"https://cloud.lingxigames.com/2022/12/7/785108464152801285.png"},
+ {n:"SP荀彧",f:"魏",s:5,c:7,wu:31,zhi:224,tong:152,su:111,apt:{騎:"S",槍:"A",弓:"A",盾:"B",器:"C"},tac:{name:"機鑑先識",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:2},desc:"準備回合使我軍群體（2-3人）獲得2次警戒，隨後每回合有21%機率（受智力影響）使我軍群體（2-3人）獲得1次警戒",inh:"竭力佐謀",img:"https://cloud.lingxigames.com/2022/12/5/784464560671879175.png"},
+ {n:"王元姬",f:"魏",s:5,c:5,wu:55,zhi:171,tong:148,su:106,apt:{騎:"A",槍:"S",弓:"A",盾:"B",器:"C"},tac:{name:"垂心萬物",type:"主動",rate:0.35,kind:"dmg",stat:"zhi",pow:0.94,aoe:1},desc:"戰鬥中，奇數回合有35%機率（受智力影響）使我軍武力最高的武將造成兵刃傷害提高10%",inh:"速乘其利",img:"https://cloud.lingxigames.com/2022/12/7/785108610911498242.png"},
+ {n:"張苞",f:"蜀",s:5,c:6,wu:202,zhi:77,tong:162,su:112,apt:{騎:"A",槍:"S",弓:"B",盾:"A",器:"C"},tac:{name:"槍舞如風",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:1.2,aoe:1},desc:"使自身及友軍單體獲得2次抵禦，持續1回合，並使自身本回合發動普通攻擊後，對敵軍造成兵刃傷害（傷害率120%）",inh:"士爭先赴",img:"https://cloud.lingxigames.com/2022/12/7/785109369312964612.png"},
+ {n:"SP諸葛亮",f:"蜀",s:5,c:6,wu:58,zhi:247,tong:186,su:83,apt:{騎:"C",槍:"S",弓:"S",盾:"B",器:"S"},tac:{name:"錦囊妙計",type:"主動",rate:0.14,kind:"dmg",stat:"zhi",pow:0.225,aoe:1},desc:"戰鬥中，奇數回合有14%機率（受智力影響），偶數回合有35%機率（受智力影響）使友軍單體的自帶主動戰法發動率提高",inh:"焰逐風飛",img:"https://cloud.lingxigames.com/2022/12/7/785108658953056263.png"},
+ {n:"伊籍",f:"蜀",s:5,c:6,wu:40,zhi:190,tong:111,su:73,apt:{騎:"S",槍:"A",弓:"B",盾:"B",器:"C"},tac:{name:"才辯機捷",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"使自身施加的灼燒、水攻、中毒、潰逃、沙暴、叛逃狀態傷害提高45%，休整和急救的恢復量提高15%",inh:"臨機制勝",img:"https://cloud.lingxigames.com/2022/12/7/785109302468341764.png"},
+ {n:"關興",f:"蜀",s:5,c:6,wu:199,zhi:113,tong:156,su:109,apt:{騎:"A",槍:"S",弓:"B",盾:"A",器:"C"},tac:{name:"刀出如霆",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.5,aoe:1},desc:"準備1回合，自身及友軍單體獲得15%倒戈，持續2回合，並對敵軍造成兵刃傷害（傷害率150%）",inh:"士爭先赴",img:"https://cloud.lingxigames.com/2022/12/7/785109416213671943.png"},
+ {n:"魏延",f:"蜀",s:5,c:6,wu:208,zhi:129,tong:168,su:106,apt:{騎:"A",槍:"S",弓:"B",盾:"S",器:"C"},tac:{name:"奇兵間道",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，自身發動準備戰法時，有75%機率（受武力影響）減少1回合準備時間，戰鬥前4回合，主動戰法造成的傷害提高15%",inh:"威謀靡亢",img:"https://cloud.lingxigames.com/2022/12/7/785109623961743369.png"},
+ {n:"SP呂蒙",f:"吳",s:5,c:7,wu:177,zhi:186,tong:192,su:66,apt:{騎:"B",槍:"S",弓:"A",盾:"B",器:"S"},tac:{name:"溯江搖櫓",type:"主動",rate:0.25,kind:"dmg",stat:"wu",pow:0.25,aoe:1,ctrl:0.35},desc:"戰鬥中，每回合有25%機率淨化自身，自身造成傷害時，有17.5%機率使隨機敵軍單體進入計窮或震懾狀態，持續1回合",inh:"益其金鼓",img:"https://cloud.lingxigames.com/2022/12/7/785109685836115971.png"},
+ {n:"SP朱儁",f:"群",s:5,c:6,wu:162,zhi:166,tong:191,su:67,apt:{騎:"C",槍:"B",弓:"S",盾:"B",器:"A"},tac:{name:"圍師必闕",type:"主動",rate:0.45,kind:"dot",stat:"zhi",pow:0.6,aoe:2},desc:"戰鬥中，當敵軍群體（2人）處於潰逃或叛逃狀態時壓制敵軍，使敵軍造成的謀略傷害降低19.5%（受統率影響）",inh:"速乘其利",img:"https://cloud.lingxigames.com/2022/12/7/785109840031313920.png"},
+ {n:"SP周瑜",f:"吳",s:5,c:6,wu:122,zhi:224,tong:176,su:75,apt:{騎:"B",槍:"A",弓:"S",盾:"A",器:"C"},tac:{name:"江天長焰",type:"主動",rate:0.45,kind:"dmg",stat:"zhi",pow:0.73,aoe:3},desc:"戰鬥中，每回合使敵軍全體受到謀略傷害提高2%（受智力影響），可疊加，並有機率對敵軍全體造成謀略傷害（傷害率73%）",inh:"焰逐風飛",img:"https://cloud.lingxigames.com/2022/12/7/785109750394843137.png"},
+ {n:"朵思大王",f:"群",s:5,c:6,wu:113,zhi:167,tong:152,su:101,apt:{騎:"S",槍:"C",弓:"A",盾:"S",器:"C"},tac:{name:"毒泉拒蜀",type:"主動",rate:0.4,kind:"dot",stat:"zhi",pow:0.75,aoe:1},desc:"對敵軍單體（80%機率選擇敵軍統率最高的武將）施加猛毒，2回合後消失，擁有猛毒的敵軍每次受到普通攻擊會疊加一層猛毒",inh:"臨機制勝",img:"https://cloud.lingxigames.com/2022/12/7/785109936366088199.png"},
+ {n:"張讓",f:"群",s:5,c:5,wu:65,zhi:183,tong:116,su:94,apt:{騎:"C",槍:"B",弓:"A",盾:"S",器:"B"},tac:{name:"竊幸乘寵",type:"主動",rate:0.45,kind:"dmg",stat:"zhi",pow:0.45,aoe:1},desc:"我軍主將恢復兵力且自身不為主將時，降低其10%治療量，自身會恢復降低的治療量，奇數回合對敵軍群體（2人）造成謀略傷害",inh:"竭力佐謀",img:"https://cloud.lingxigames.com/2022/12/7/785110210774233090.png"},
+ {n:"沮授",f:"群",s:5,c:6,wu:56,zhi:204,tong:173,su:81,apt:{騎:"B",槍:"A",弓:"S",盾:"S",器:"A"},tac:{name:"監統震軍",type:"主動",rate:0.19,kind:"dmg",stat:"zhi",pow:0.57,aoe:2,ctrl:0.35},desc:"戰鬥中，友軍群體造成負面狀態時，有19%機率（受智力影響）使負面狀態持續時間增加1回合",inh:"威謀靡亢",img:"https://cloud.lingxigames.com/2022/12/7/785109984621555720.png"},
+ {n:"鄒氏",f:"群",s:5,c:3,wu:9,zhi:151,tong:85,su:129,apt:{騎:"C",槍:"C",弓:"C",盾:"B",器:"C"},tac:{name:"顧盼生姿",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"偷取敵軍一名男性武將17.5點智力給自身和友軍單體（受魅力影響）持續2回合，可疊加2次",inh:"先成其慮",img:"https://cloud.lingxigames.com/2022/12/7/785110136610549761.png"},
+ {n:"董白",f:"群",s:5,c:3,wu:161,zhi:69,tong:143,su:115,apt:{騎:"C",槍:"B",弓:"C",盾:"C",器:"C"},tac:{name:"雲聚影從",type:"主動",rate:0.5,kind:"dmg",stat:"wu",pow:0.5,aoe:1},desc:"戰鬥中，自身即將受到普通攻擊時，有50%機率（受武力影響）使武力最高的友軍單體獲得反擊效果（傷害率50%）和急救狀態",inh:"益其金鼓",img:"https://cloud.lingxigames.com/2022/12/7/785110090087329793.png"},
+ {n:"許攸",f:"群",s:5,c:6,wu:27,zhi:178,tong:131,su:89,apt:{騎:"A",槍:"A",弓:"A",盾:"A",器:"C"},tac:{name:"傲睨王侯",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:2},desc:"戰鬥中，發現15個敵軍破綻，破綻會分佈在全體敵軍中，敵軍目標受到普通攻擊時會觸發一個破綻",inh:"定謀貴決",img:"https://cloud.lingxigames.com/2022/12/7/785109889079504905.png"},
+ {n:"SP貂蟬",f:"群",s:5,c:6,wu:48,zhi:180,tong:113,su:93,apt:{騎:"A",槍:"A",弓:"S",盾:"B",器:"S"},tac:{name:"離月",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.18,aoe:3},desc:"(非官網庫,估計值)",inh:"韜心惑敵"},
+ {n:"星彩",f:"蜀",s:5,c:5,wu:194,zhi:141,tong:185,su:172,apt:{騎:"A",槍:"S",弓:"B",盾:"A",器:"B"},tac:{name:"巾幗英傑",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.45,aoe:1,ctrl:0.35},desc:"(非官網庫,估計值)",inh:""},
+ {n:"SP關羽",f:"蜀",s:5,c:7,wu:228,zhi:130,tong:197,su:138,apt:{騎:"A",槍:"S",弓:"B",盾:"S",器:"B"},tac:{name:"水淹七軍",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.85,aoe:1,ctrl:0.4},desc:"(非官網庫,估計值)",inh:"忠勇義烈"},
+ {n:"SP法正",f:"蜀",s:5,c:6,wu:58,zhi:216,tong:160,su:98,apt:{騎:"A",槍:"A",弓:"A",盾:"S",器:"S"},tac:{name:"虛實奇謀",type:"主動",rate:0.4,kind:"drain",stat:"zhi",pow:1.35,aoe:2},desc:"(非官網庫,估計值)",inh:"魚鱗陣"},
+ {n:"SP馬超",f:"群",s:5,c:7,wu:233,zhi:81,tong:179,su:174,apt:{騎:"S",槍:"S",弓:"B",盾:"B",器:"C"},tac:{name:"威武並昭",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.9,aoe:1},desc:"(非官網庫,估計值)",inh:"萬軍奪帥"},
+ {n:"SP盧植",f:"群",s:5,c:6,wu:114,zhi:183,tong:186,su:91,apt:{騎:"B",槍:"A",弓:"S",盾:"A",器:"A"},tac:{name:"國之楨榦",type:"指揮",rate:1,kind:"shield",pow:0.2,aoe:3},desc:"(非官網庫,估計值)",inh:"雁行陣"},
+ {n:"SP董卓",f:"群",s:5,c:6,wu:178,zhi:139,tong:186,su:113,apt:{騎:"S",槍:"B",弓:"B",盾:"S",器:"B"},tac:{name:"權僭九鼎",type:"主動",rate:0.4,kind:"drain",stat:"wu",pow:1.6,aoe:2},desc:"(非官網庫,估計值)",inh:"剛柔並濟"},
+ {n:"SP皇甫嵩",f:"群",s:5,c:6,wu:116,zhi:175,tong:207,su:71,apt:{騎:"A",槍:"S",弓:"B",盾:"S",器:"A"},tac:{name:"扶危定傾",type:"指揮",rate:1,kind:"buff",pow:0.14,aoe:3},desc:"(非官網庫,估計值)",inh:"整軍經武"},
+ {n:"郭淮",f:"魏",s:4,c:4,wu:163,zhi:176,tong:189,su:145,apt:{騎:"A",槍:"B",弓:"B",盾:"S",器:"A"},tac:{name:"堅壁清野",type:"指揮",rate:1,kind:"shield",pow:0.18,aoe:3},desc:"(非官網庫,估計值)",inh:""},
+ {n:"馬岱",f:"蜀",s:5,c:6,wu:187,zhi:113,tong:147,su:124,apt:{騎:"S",槍:"B",弓:"B",盾:"B",器:"C"},tac:{name:"密計誅逆",type:"突擊",rate:0.35,kind:"dmg",stat:"wu",pow:1.25,aoe:1},desc:"(非官網庫,估計值)",inh:"移花接木"},
+ {n:"關平",f:"蜀",s:4,c:4,wu:187,zhi:132,tong:180,su:158,apt:{騎:"A",槍:"S",弓:"B",盾:"A",器:"C"},tac:{name:"虎父無犬",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.35,aoe:1},desc:"(非官網庫,估計值)",inh:""},
+ {n:"韓當",f:"吳",s:4,c:4,wu:183,zhi:128,tong:172,su:167,apt:{騎:"A",槍:"B",弓:"S",盾:"B",器:"C"},tac:{name:"左右開弓",type:"主動",rate:0.35,kind:"dmg",stat:"wu",pow:1.4,aoe:2},desc:"(非官網庫,估計值)",inh:""},
+ {n:"徐盛",f:"吳",s:4,c:4,wu:185,zhi:145,tong:176,su:163,apt:{騎:"B",槍:"B",弓:"S",盾:"A",器:"B"},tac:{name:"疑城之計",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.35,aoe:1},desc:"(非官網庫,估計值)",inh:""},
+ {n:"蔣欽",f:"吳",s:4,c:4,wu:176,zhi:136,tong:180,su:154,apt:{騎:"B",槍:"B",弓:"S",盾:"A",器:"B"},tac:{name:"天降火雨",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:1.25,aoe:2},desc:"(非官網庫,估計值)",inh:""},
+ {n:"審配",f:"群",s:4,c:4,wu:128,zhi:180,tong:176,su:128,apt:{騎:"B",槍:"B",弓:"A",盾:"A",器:"S"},tac:{name:"坐守孤城",type:"主動",rate:0.45,kind:"heal",stat:"zhi",pow:1.2,aoe:2},desc:"(非官網庫,估計值)",inh:""},
+ {n:"張任",f:"群",s:4,c:4,wu:180,zhi:154,tong:176,su:158,apt:{騎:"A",槍:"B",弓:"S",盾:"B",器:"B"},tac:{name:"伏兵落鳳",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.3,aoe:1,ctrl:0.4},desc:"(非官網庫,估計值)",inh:""},
+ {n:"朱儁",f:"群",s:4,c:4,wu:167,zhi:163,tong:185,su:136,apt:{騎:"B",槍:"B",弓:"S",盾:"A",器:"A"},tac:{name:"討逆平亂",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.35,aoe:2},desc:"(非官網庫,估計值)",inh:""},
+ {n:"張梁",f:"群",s:4,c:4,wu:176,zhi:136,tong:172,su:150,apt:{騎:"B",槍:"A",弓:"B",盾:"S",器:"B"},tac:{name:"人公將軍",type:"指揮",rate:1,kind:"shield",pow:0.14,aoe:3},desc:"(非官網庫,估計值)",inh:""},
+ {n:"張寶",f:"群",s:4,c:4,wu:136,zhi:185,tong:167,su:145,apt:{騎:"B",槍:"B",弓:"A",盾:"A",器:"S"},tac:{name:"地公妖術",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.4,aoe:2},desc:"(非官網庫,估計值)",inh:""},
+ {n:"皇甫嵩",f:"群",s:4,c:4,wu:172,zhi:167,tong:189,su:141,apt:{騎:"A",槍:"A",弓:"B",盾:"S",器:"A"},tac:{name:"漢室柱石",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:3},desc:"(非官網庫,估計值)",inh:""},
+ {n:"王異",f:"魏",s:5,c:6,wu:71,zhi:182,tong:157,su:78,apt:{騎:"A",槍:"B",弓:"S",盾:"B",器:"A"},tac:{name:"至柔動剛",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.5,aoe:2},desc:"(非官網庫,估計值)",inh:"臻於至善"},
+ {n:"SP劉曄",f:"魏",s:5,c:6,wu:49,zhi:212,tong:140,su:57,apt:{騎:"S",盾:"C",弓:"S",槍:"B",器:"S"},tac:{name:"計定謀決",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.64,aoe:1},desc:"偷取敵軍智力最高武將12→24點智力(受智力影響):且每當自身試圖發動主動戰法前，恢復我軍單體一定兵力(治療率32%→64%，受智力影響)",inh:"因利制權"},
+ {n:"SP典韋",f:"魏",s:5,c:6,wu:223,zhi:44,tong:162,su:133,apt:{騎:"B",盾:"S",弓:"C",槍:"A",器:"C"},tac:{name:"捨身救主",type:"被動",rate:1,kind:"guard",pow:0.18},desc:"戰鬥中，自身受到傷害降低45%→90%，每次受到傷害後該效果降低1.5%→3%(上限30次);降低5次後自身受到傷害時有17.5%→35%概率(受統率影響)視為2次",inh:"以寡敵眾"},
+ {n:"SP孫堅",f:"吳",s:5,c:7,wu:186,zhi:120,tong:208,su:41,apt:{騎:"A",盾:"S",弓:"S",槍:"A",器:"C"},tac:{name:"奉令平虜",type:"主動",rate:0.35,kind:"heal",stat:"zhi",pow:0.4,aoe:1},desc:"戰鬥中，友軍獲得功能性增益時有17.5%→35%機率(受統率影響)延長1回合:此效果每觸發3次，治療友軍單體(治療率20%→40%)",inh:"赴湯蹈火"},
+ {n:"SP張寶",f:"群",s:5,c:6,wu:84,zhi:178,tong:166,su:49,apt:{騎:"B",盾:"S",弓:"A",槍:"A",器:"S"},tac:{name:"飛沙走石",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.58,aoe:2},desc:"奇數回合敵軍群體(2人)智力降低18→36點，持續1回合並陷入水攻狀態2回合(傷害率29→58%)。偶數回合使敵軍隨機單體武力智力對調並陷入2回合沙暴狀態(傷害54→108%)",inh:"疾風驟雨"},
+ {n:"SP曹操",f:"群",s:5,c:7,wu:137,zhi:186,tong:231,su:96,apt:{騎:"S",盾:"A",弓:"S",槍:"A",器:"B"},tac:{name:"承天靖世",type:"主動",rate:0.12,kind:"dmg",stat:"zhi",pow:0.1,aoe:3},desc:"戰鬥中，每回合開始有6%→12%機率威懾敵軍全體，持續一回合；每回合結束時對敵軍(2~3人)造成謀略傷害(傷害率5%→10%+5%→10%*威懾次數，無視防禦)",inh:"藏器待時"},
+ {n:"SP張梁",f:"群",s:5,c:5,wu:167,zhi:123,tong:169,su:135,apt:{騎:"B",盾:"A",弓:"B",槍:"S",器:"A"},tac:{name:"聚石成金",type:"指揮",rate:1,kind:"debuff",stat:"wu",pow:0.15,aoe:3},desc:"奇數回合我軍全體統率提升34→68點，並使敵軍魅力低於我軍主將的武將陷入禁療狀態2回合。偶數回合我軍受到的主動及突擊戰法傷害降低12→24%",inh:"疾風驟雨"},
+ {n:"SP曹真",f:"魏",s:5,c:6,wu:132,zhi:159,tong:193,su:95,apt:{騎:"S",盾:"S",弓:"B",槍:"A",器:"C"},tac:{name:"淵然難測",type:"主動",rate:0.5,kind:"ctrl",pow:0,aoe:2,ctrl:0.4},desc:"戰鬥中，我軍群體(2-3人)受到普通攻擊時，有25%→50%機率使傷害來源受到傷害提升3%→6%，可疊加3次；首回合觸發時若來源武力高於智力則繳械",inh:"上兵伐謀"},
+ {n:"SP步練師",f:"吳",s:5,c:6,wu:17,zhi:163,tong:121,su:55,apt:{騎:"C",盾:"C",弓:"S",槍:"C",器:"A"},tac:{name:"淑懿之德",type:"主動",rate:0.5,kind:"dmg",stat:"zhi",pow:0.25,aoe:1},desc:"我軍主將每擁有1種功能性狀態，智力統率提升1.5%→3%；第3回合起每回合有25%→50%機率對敵軍單體造成謀略傷害(傷害率12.5%→25%*功能性增益狀態數)",inh:"深謀遠慮"},
+ {n:"SP樂進",f:"魏",s:5,c:6,wu:186,zhi:91,tong:167,su:125,apt:{騎:"S",盾:"A",弓:"B",槍:"S",器:"S"},tac:{name:"同戰身先",type:"主動",rate:0.35,kind:"dmg",stat:"wu",pow:0.2,aoe:3},desc:"使我軍全體獲得1次抵禦，並使我軍隨機武將受到普通攻擊後有17.5%→35%機率對敵軍單體造成兵刃傷害(傷害率10%→20%)",inh:"止戈為武"},
+ {n:"SP許褚",f:"魏",s:5,c:6,wu:226,zhi:54,tong:148,su:123,apt:{騎:"A",盾:"S",弓:"B",槍:"S",器:"C"},tac:{name:"虎侯",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.66,aoe:3},desc:"友軍群體發動或受到普通攻擊時，自身有22.5%→45%機率使我軍全體統率提升7.5→15點，可疊加5次，並對敵軍單體造成兵刃傷害(傷害率33%→66%)",inh:"萬軍奪帥"},
+ {n:"SP黃忠",f:"蜀",s:5,c:6,wu:206,zhi:117,tong:179,su:92,apt:{騎:"A",盾:"S",弓:"S",槍:"A",器:"C"},tac:{name:"定軍斬將",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.96,aoe:3},desc:"準備1回合，對敵軍全體造成兵刃傷害(傷害率98%→196%)並使其造成傷害降低16%→32%，持續2回合，隨後我軍全體2回合內免疫技窮",inh:"魚鱗陣"},
+ {n:"SP龐德",f:"魏",s:5,c:6,wu:207,zhi:124,tong:175,su:55,apt:{騎:"A",盾:"B",弓:"S",槍:"B",器:"B"},tac:{name:"死戰不退",type:"主動",rate:0.6,kind:"dmg",stat:"wu",pow:1.3,aoe:1,ctrl:0.35},desc:"自身免疫混亂；受到傷害時80%機率獲得蓄威(最多20層)；普攻後50%機率消耗一層對敵軍單體造成兵刃傷害(傷害率65%→130%)",inh:"忠勇義烈"},
+ {n:"SP黃月英",f:"蜀",s:5,c:4,wu:32,zhi:191,tong:124,su:114,apt:{騎:"C",盾:"C",弓:"C",槍:"C",器:"S"},tac:{name:"蕙質蘭心",type:"主動",rate:0.5,kind:"heal",stat:"zhi",pow:1.5,aoe:3},desc:"我軍全體統率提升10→20，自身獲得7層蘭心，每層使造成和受到傷害降低5%→10%;受傷時消耗1層並有50%機率治療我軍單體(治療率111%→222%)",inh:"功不唐捐"},
+ {n:"何氏",f:"群",s:5,c:4,wu:37,zhi:117,tong:91,su:62,apt:{騎:"C",盾:"C",弓:"B",槍:"C",器:"C"},tac:{name:"帷內擅權",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.4,aoe:1},desc:"(估計值,資料待補)",inh:"絕計折謀"},
+ {n:"無雙大喬",f:"吳",s:5,c:6,wu:86,zhi:174,tong:182,su:112,apt:{騎:"A",盾:"C",弓:"S",槍:"A",器:"C"},tac:{name:"堅強之花",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"即將受到普通攻擊時20%→38%機率使武力最高的友軍造成傷害提升7.8%→18.6%持續1回合，對象友軍與敵軍攻擊者互相發動1次普攻",inh:""},
+ {n:"無雙小喬",f:"吳",s:5,c:5,wu:179,zhi:0,tong:74,su:160,apt:{騎:"B",盾:"C",弓:"A",槍:"A",器:"C"},tac:{name:"純潔之花",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"若自身兵種適性為我方最低則不會被選為普攻目標且全屬性提升10%→15%；我軍COST最高武將發動主動/突擊戰法時有33%→60%機率額外觸發",inh:""},
+ {n:"無雙呂玲綺",f:"群",s:5,c:7,wu:214,zhi:0,tong:144,su:130,apt:{騎:"S",盾:"B",弓:"S",槍:"A",器:"C"},tac:{name:"鬼神之女",type:"主動",rate:0.48,kind:"dmg",stat:"wu",pow:0.98,aoe:2},desc:"每回合行動時30%→48%機率:若自身武力高於其他友軍，釋放無雙亂舞對敵方群體(2~3人)造成兵刃傷害(傷害率62%→98%);反之武力提升並使武力最高友軍獲得反擊",inh:""},
+ {n:"無雙朱然",f:"吳",s:5,c:6,wu:217,zhi:145,tong:159,su:118,apt:{騎:"B",盾:"B",弓:"S",槍:"A",器:"B"},tac:{name:"坐釣鯨鰲",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.52,aoe:1},desc:"無法普攻，每回合若無敵軍灼燒則獲得1次抵禦;抵禦被消耗時若有敵軍灼燒，對其造成兵刃傷害(傷害率為累計消耗抵禦次數×52%)",inh:""},
+ {n:"無雙星彩",f:"蜀",s:5,c:6,wu:170,zhi:112,tong:247,su:113,apt:{騎:"B",盾:"S",弓:"C",槍:"S",器:"B"},tac:{name:"伏盾反攻",type:"被動",rate:1,kind:"guard",pow:0.18},desc:"自身和我軍主將各獲得自身兵力10%的護盾1回合;護盾存在期間受控制時80%機率免疫;下回合行動前若護盾仍存在則對敵軍群體造成兵刃傷害",inh:""},
+ {n:"無雙曹丕",f:"魏",s:5,c:7,wu:183,zhi:0,tong:170,su:96,apt:{騎:"S",盾:"A",弓:"S",槍:"C",器:"C"},tac:{name:"受禪稱帝",type:"主動",rate:0.48,kind:"dmg",stat:"wu",pow:2.08,aoe:1},desc:"稱帝前友軍發動主動戰法後自身有48%機率受禪(獲得友軍單體16%屬性)，第三次受禪觸發稱帝:清除負面並對敵軍造成3次攻擊(傷害率208%)",inh:""},
+ {n:"無雙甄姬",f:"魏",s:5,c:5,wu:74,zhi:257,tong:158,su:127,apt:{騎:"S",盾:"B",弓:"S",槍:"B",器:"C"},tac:{name:"玉肌花貌",type:"被動",rate:1,kind:"guard",pow:0.18},desc:"奇數回合自身發動主動戰法時有40%機率再發動一次;偶數回合自身獲得40%規避效果",inh:""},
+ {n:"無雙關平",f:"蜀",s:5,c:6,wu:236,zhi:121,tong:167,su:129,apt:{騎:"S",盾:"A",弓:"C",槍:"S",器:"C"},tac:{name:"武聖之子",type:"指揮",rate:1,kind:"debuff",stat:"wu",pow:0.15,aoe:1},desc:"戰鬥首回合對敵軍武力最高的武將施加繳械，並降低敵軍統率最高的武將15→30點統率，持續1回合，有50→90%概率增加1~3持續回合",inh:""},
+ {n:"諸葛恪",f:"吳",s:5,c:4,wu:61,zhi:182,tong:130,su:36,apt:{騎:"C",盾:"C",弓:"A",槍:"S",器:"A"},tac:{name:"揮兵謀勝",type:"被動",rate:1,kind:"guard",pow:0.18},desc:"前3回合機率賦予分隊抵禦；抵禦消耗或結束時轉化為治療或一次隨機兵刃反擊",inh:"因利制權"},
+ {n:"馬忠",f:"吳",s:5,c:6,wu:167,zhi:122,tong:138,su:152,apt:{騎:"C",盾:"A",弓:"S",槍:"A",器:"A"},tac:{name:"暗箭難防",type:"主動",rate:0.4,kind:"ctrl",pow:0,aoe:3,ctrl:0.4},desc:"準備1回合。全體兵刃攻擊，並機率「捕獲」敵軍(無法行動且禁用指揮被動)",inh:"鋒芒畢露"},
+ {n:"麴義",f:"群",s:5,c:6,wu:152,zhi:81,tong:169,su:83,apt:{騎:"B",盾:"C",弓:"S",槍:"C",器:"B"},tac:{name:"先登死士",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"將弓兵進階為悍不畏死的先登死士：我軍全體免疫遇襲，受到傷害時有30%→60%機率偷取攻擊者10.5→21點統率",inh:"先登死士"},
+ {n:"丁奉",f:"吳",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"短兵相接",type:"指揮",rate:1,kind:"debuff",stat:"wu",pow:0.15,aoe:1},desc:"對敵軍單體造成兵刃攻擊並降低其統率屬性，具備一定的破防效果",inh:"短兵相接"},
+ {n:"劉封",f:"蜀",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"騎虎難下",type:"主動",rate:0.35,kind:"dmg",stat:"wu",pow:0.72,aoe:2,ctrl:0.35},desc:"當除自己之外的友軍受到普通攻擊時，有20%→35%概率對該友軍造成當回合禁療並對敵軍群體(2人)造成兵刃攻擊(傷害率36%→72%)",inh:"騎虎難下"},
+ {n:"劉曄",f:"魏",s:4,c:6,wu:49,zhi:212,tong:140,su:57,apt:{騎:"S",盾:"C",弓:"S",槍:"B",器:"S"},tac:{name:"料事如神",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.06,aoe:2},desc:"對敵軍群體(2人)造成謀略傷害(傷害率53%→106%)並使其造成的兵刃傷害和謀略傷害降低8%→16%，持續2回合",inh:"料事如神"},
+ {n:"孔融",f:"群",s:4,c:4,wu:121,zhi:187,tong:172,su:145,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"謙讓",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"使我軍單體受到的兵刃傷害和謀略傷害降低11%→22%，持續3回合",inh:""},
+ {n:"廖化",f:"蜀",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"詐降",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:1.5,aoe:1},desc:"首回合自己獲得混亂狀態，第2回合起獲得休整狀態(每回合恢復兵力，治療率80%→160%)，持續3回合",inh:"詐降"},
+ {n:"周倉",f:"蜀",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"矢志不移",type:"主動",rate:0.5,kind:"dmg",stat:"wu",pow:1.0,aoe:1},desc:"前2回合獲得群攻(傷害率50%→100%)狀態但只有50%概率發動，第3回合起每回合提高7.5→15武力",inh:"矢志不移"},
+ {n:"張曼成",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"神上使",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.68,aoe:3},desc:"準備1回合，對敵軍全體造成潰逃狀態，每回合持續造成傷害(傷害率34%→68%)，持續2回合",inh:""},
+ {n:"張燕",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"輕勇飛燕",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.84,aoe:1},desc:"對敵軍單體造成兵刃攻擊(傷害率42%→84%)，隨機釋放2→4次",inh:"輕勇飛燕"},
+ {n:"張繡",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"暗潮洶湧",type:"主動",rate:1,kind:"buff",pow:0.12},desc:"準備1回合。對敵軍主將造成一次強力兵刃攻擊(272%)",inh:"暗潮洶湧"},
+ {n:"文聘",f:"魏",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"手起刀落",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:2.14,aoe:1},desc:"普通攻擊之後，對攻擊目標再次發起一次兵刃攻擊(傷害率107%→214%)",inh:"手起刀落"},
+ {n:"曹洪",f:"魏",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"驍勇善戰",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:3.0,aoe:1},desc:"準備1回合，對敵軍單體造成一次兵刃攻擊(傷害率150%→300%)並提高自己20→40點速度",inh:"驍勇善戰"},
+ {n:"曹彰",f:"魏",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"挫志怒襲",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.88,aoe:2,ctrl:0.35},desc:"準備1回合，對敵軍群體(2人)施加虛弱狀態1回合；若目標已虛弱則改為造成猛擊(傷害率188%)",inh:"挫志怒襲"},
+ {n:"朱恆",f:"吳",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"千里馳援",type:"被動",rate:1,kind:"guard",pow:0.18},desc:"援護我軍全體(分擔普攻)並提升自身40統率，持續1回合",inh:""},
+ {n:"李傕",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"縱兵劫掠",type:"主動",rate:0.4,kind:"ctrl",pow:0,aoe:1,ctrl:0.4},desc:"對敵軍單體造成兵刃攻擊(172%)，並使其陷入震懾1回合",inh:""},
+ {n:"李典",f:"魏",s:4,c:4,wu:121,zhi:187,tong:172,su:145,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"長者之風",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"使我軍全體武力、智力提高14→28點",inh:"長者之風"},
+ {n:"沙摩柯",f:"蜀",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"彎弓飲羽",type:"主動",rate:0.4,kind:"ctrl",pow:0,aoe:1,ctrl:0.4},desc:"普通攻擊之後，使攻擊目標降低75→150點統率，並造成計窮狀態1回合",inh:"彎弓飲羽"},
+ {n:"王朗",f:"魏",s:4,c:4,wu:121,zhi:187,tong:172,su:145,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"唇槍舌戰",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:0.6,aoe:3},desc:"對敵軍全體造成謀略攻擊(傷害率30%→60%)及嘲諷，持續1回合",inh:"唇槍舌戰"},
+ {n:"潘璋",f:"吳",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"不辱使命",type:"主動",rate:0.3,kind:"dmg",stat:"wu",pow:2.2,aoe:1,ctrl:0.35},desc:"對敵軍單體造成一次兵刃攻擊(傷害率110%→220%)，並有15%→30%概率施加震懾1回合",inh:"不辱使命"},
+ {n:"管亥",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"魯莽",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"使自己獲得洞察及21%→42%倒戈，持續2回合",inh:"魯莽"},
+ {n:"臧霸",f:"魏",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"避實擊虛",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.85,aoe:1},desc:"對統率最低的敵軍單體發動一次兵刃攻擊(傷害率92.5%→185%)",inh:"避實擊虛"},
+ {n:"紀靈",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"威風凜凜",type:"主動",rate:0.4,kind:"ctrl",pow:0,aoe:2,ctrl:0.4},desc:"對敵單體造成嘲諷或繳械，並有機率額外釋放一次造成群體控制",inh:"強攻"},
+ {n:"董襲",f:"吳",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"自癒",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:1.0,aoe:1},desc:"戰鬥中，使自己每回合恢復一定兵力(治療率100%)",inh:"自癒"},
+ {n:"胡車兒",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"驍健神行",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.56,aoe:1,ctrl:0.35},desc:"對敵軍單體造成繳械1回合，且自身獲得必中2回合，若目標已被繳械則造成兵刃攻擊(傷害率156%)",inh:"驍健神行"},
+ {n:"郭圖",f:"群",s:4,c:4,wu:121,zhi:187,tong:172,su:145,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"進言",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"使友軍單體主動戰法發動幾率提高4%→8%，並提高20→40點智力，持續2回合",inh:""},
+ {n:"逢紀",f:"群",s:4,c:4,wu:121,zhi:187,tong:172,su:145,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"腹背受敵",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"使敵軍智力最高者對其自身另一名隊友造成一次謀略攻擊",inh:"風聲鶴唳"},
+ {n:"郭汜",f:"群",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"暴斂四方",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.02,aoe:1,ctrl:0.35},desc:"對敵軍單體造成2次兵刃攻擊(傷害率51%→102%)，若目標震懾則造成禁療2回合",inh:"暴斂四方"},
+ {n:"陳武",f:"吳",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"廬江上甲",type:"被動",rate:1,kind:"guard",pow:0.18},desc:"提高自身22→44統率，並為友軍單體分擔20%→40%傷害，持續2回合",inh:""},
+ {n:"韓遂",f:"群",s:4,c:4,wu:121,zhi:187,tong:172,su:145,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"暗藏玄機",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.44,aoe:1},desc:"普通攻擊之後對攻擊目標再次發起兵刃攻擊(傷害率72%→144%)，若目標為敵軍主將則額外造成謀略傷害(傷害率46%→92%)",inh:""},
+ {n:"黃權",f:"蜀",s:4,c:4,wu:187,zhi:121,tong:172,su:154,apt:{騎:"B",盾:"B",弓:"B",槍:"B",器:"B"},tac:{name:"機略縱橫",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.58,aoe:2},desc:"準備1回合，對敵軍群體(2人)造成灼燒、中毒狀態，每回合持續造成傷害(傷害率29%→58%)，持續2回合",inh:"機略縱橫"},
+ {n:"周劭",f:"魏",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"B",弓:"S",槍:"A",器:"B"},tac:{name:"周劭兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"蘇信",f:"吳",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"S",盾:"B",弓:"A",槍:"A",器:"B"},tac:{name:"蘇信兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"陳翊",f:"蜀",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"B",弓:"A",槍:"S",器:"B"},tac:{name:"陳翊兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"蕭芷",f:"魏",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"S",弓:"A",槍:"A",器:"B"},tac:{name:"蕭芷兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"沈姮",f:"魏",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"S",盾:"B",弓:"A",槍:"A",器:"B"},tac:{name:"沈姮兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"楊琪",f:"魏",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"B",弓:"S",槍:"A",器:"B"},tac:{name:"楊琪兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"皇甫宏",f:"群",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"B",弓:"A",槍:"S",器:"B"},tac:{name:"皇甫宏兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"馬嬋",f:"蜀",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"B",弓:"S",槍:"A",器:"B"},tac:{name:"馬嬋兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"陳熙",f:"群",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"B",弓:"S",槍:"A",器:"B"},tac:{name:"陳熙兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+ {n:"徐彥",f:"群",s:5,c:5,wu:136,zhi:185,tong:180,su:150,apt:{騎:"B",盾:"S",弓:"A",槍:"A",器:"B"},tac:{name:"徐彥兵略",type:"指揮",rate:1,kind:"buff",pow:0.12,aoe:3},desc:"(台服新武將,官方資料待補;數值與戰法為估計值)",inh:""},
+];
+
+/* 可額外攜帶的戰法池(近似示意) */
+const TACTICS = [
+ {name:"—(不攜帶)",type:"",rate:0,kind:"none"},
+ {name:"八門金鎖陣",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:.18,aoe:3},
+ {name:"暫避其鋒",type:"指揮",rate:1,kind:"shield",pow:.22,aoe:2},
+ {name:"盛氣凌敵",type:"主動",rate:.45,kind:"ctrl",pow:0,aoe:2,ctrl:.5},
+ {name:"四面楚歌",type:"主動",rate:.45,kind:"dmg",stat:"zhi",pow:1.35,aoe:2},
+ {name:"奪魂挾魄",type:"主動",rate:.5,kind:"drain",stat:"zhi",pow:1.1,aoe:2},
+ {name:"後發制人",type:"被動",rate:1,kind:"counter",pow:.8},
+ {name:"落鳳",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.3,aoe:1,ctrl:.45},
+ {name:"橫掃千軍",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.5,aoe:2},
+ {name:"萬箭齊發",type:"主動",rate:.35,kind:"dmg",stat:"wu",pow:1.45,aoe:3},
+ {name:"溫酒斬將",type:"主動",rate:.35,kind:"dmg",stat:"wu",pow:1.85,aoe:1},
+ {name:"錦囊妙計",type:"主動",rate:.4,kind:"dmg",stat:"zhi",pow:1.6,aoe:2},
+ {name:"坐守孤城",type:"主動",rate:.45,kind:"heal",stat:"zhi",pow:1.2,aoe:2},
+ {name:"刮骨療毒",type:"主動",rate:.45,kind:"heal",stat:"zhi",pow:1.35,aoe:1},
+ {name:"縱兵劫掠",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.2,aoe:2,ctrl:.35},
+ {name:"疾風驟雨",type:"突擊",rate:.35,kind:"dmg",stat:"wu",pow:1.3,aoe:1},
+ {name:"自愈",type:"被動",rate:1,kind:"regen",pow:.06},
+ {name:"三軍之眾",type:"指揮",rate:1,kind:"buff",pow:.12,aoe:3},
+ {name:"文武雙全",type:"被動",rate:1,kind:"buff",pow:.1},
+ {name:"守而必固",type:"指揮",rate:1,kind:"shield",pow:.18,aoe:2},
+ {name:"鋒矢陣",type:"陣法",rate:1,kind:"buff",pow:.18,aoe:1},
+ {name:"箕形陣",type:"陣法",rate:1,kind:"shield",pow:.16,aoe:3},
+ {name:"魚鱗陣",type:"陣法",rate:1,kind:"buff",pow:.1,aoe:3},
+ {name:"雁行陣",type:"陣法",rate:1,kind:"buff",pow:.14,aoe:2},
+ {name:"料事如神",type:"主動",rate:.4,kind:"dmg",stat:"zhi",pow:1.55,aoe:1},
+ {name:"渾水摸魚",type:"主動",rate:.4,kind:"debuff",stat:"zhi",pow:.2,aoe:2},
+ {name:"火熾原燎",type:"主動",rate:.35,kind:"dot",stat:"zhi",pow:1.5,aoe:2},
+ {name:"無心戀戰",type:"主動",rate:.4,kind:"debuff",stat:"zhi",pow:.16,aoe:2,ctrl:.3},
+ {name:"士別三日",type:"被動",rate:1,kind:"buff",pow:.12},
+ {name:"措手不及",type:"主動",rate:.4,kind:"dmg",stat:"zhi",pow:1.4,aoe:1,ctrl:.35},
+ {name:"威謀靡亢",type:"被動",rate:1,kind:"buff",pow:.14},
+ {name:"絕地反擊",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.6,aoe:1},
+ // ---- S26 賽季補充(近似參數) ----
+ {name:"太平道法",type:"主動",rate:.4,kind:"dmg",stat:"zhi",pow:1.8,aoe:2},
+ {name:"杯蛇鬼車",type:"主動",rate:.4,kind:"dot",stat:"zhi",pow:1.5,aoe:2},
+ {name:"擊其惰歸",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.55,aoe:1,ctrl:.3},
+ {name:"剛勇無前",type:"被動",rate:1,kind:"buff",pow:.15},
+ {name:"嬰城自守",type:"指揮",rate:1,kind:"shield",pow:.2,aoe:2},
+ {name:"破軍威勝",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.7,aoe:1},
+ {name:"折衝禦侮",type:"指揮",rate:1,kind:"counter",pow:.6},
+ {name:"當鋒摧決",type:"被動",rate:1,kind:"buff",pow:.16},
+ {name:"竭力佐謀",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:.16,aoe:3},
+ {name:"偽書相間",type:"主動",rate:.4,kind:"debuff",stat:"zhi",pow:.2,aoe:2,ctrl:.35},
+ {name:"草船借箭",type:"指揮",rate:1,kind:"shield",pow:.18,aoe:2},
+ {name:"速乘其利",type:"突擊",rate:.35,kind:"dmg",stat:"wu",pow:1.4,aoe:1},
+ {name:"裸衣血戰",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.9,aoe:1},
+ {name:"百騎劫營",type:"主動",rate:.4,kind:"dmg",stat:"wu",pow:1.6,aoe:2},
+ {name:"暴戾無仁",type:"主動",rate:.4,kind:"drain",stat:"wu",pow:1.6,aoe:1},
+ {name:"非攻制勝",type:"主動",rate:.4,kind:"dmg",stat:"zhi",pow:1.45,aoe:2},
+ {name:"剛柔並濟",type:"主動",rate:.4,kind:"dmg",stat:"zhi",pow:1.5,aoe:2},
+ {name:"合軍聚眾",type:"指揮",rate:1,kind:"buff",pow:.15,aoe:3},
+ {name:"勠力同心",type:"指揮",rate:1,kind:"buff",pow:.12,aoe:3},
+ {name:"眾志成城",type:"指揮",rate:1,kind:"shield",pow:.2,aoe:3},
+ {name:"潛龍陣",type:"陣法",rate:1,kind:"buff",pow:.16,aoe:3},
+ {name:"武鋒陣",type:"陣法",rate:1,kind:"buff",pow:.18,aoe:2},
+ {name:"鐵騎驅馳",type:"主動",rate:.35,kind:"dmg",stat:"wu",pow:1.35,aoe:1,ctrl:.3},
+ {name:"陷陣營",type:"兵種",rate:1,kind:"shield",pow:.18,aoe:1},
+ {name:"無當飛軍",type:"兵種",rate:1,kind:"buff",pow:.12,aoe:1},
+ {name:"錦帆軍",type:"兵種",rate:1,kind:"buff",pow:.12,aoe:1},
+ {name:"飛熊軍",type:"兵種",rate:1,kind:"buff",pow:.14,aoe:1},
+ {name:"虎豹騎",type:"兵種",rate:1,kind:"buff",pow:.15,aoe:1},
+ {name:"藤甲兵",type:"兵種",rate:1,kind:"tengjia",pow:.25,aoe:3},
+ // ---- 傳承戰法(官網庫拆解可得;參數為近似) ----
+ {name:"一力拒守",type:"指揮",rate:1,kind:"shield",pow:0.18,aoe:2},
+ {name:"一騎當千",type:"被動",rate:1,kind:"buff",pow:0.15},
+ {name:"乘勝長驅",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.4,aoe:2},
+ {name:"乘敵不虞",type:"突擊",rate:0.35,kind:"dmg",stat:"wu",pow:1.5,aoe:1},
+ {name:"傾國傾城",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.18,aoe:3},
+ {name:"先成其慮",type:"指揮",rate:1,kind:"shield",pow:0.16,aoe:2},
+ {name:"克敵制勝",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.45,aoe:1},
+ {name:"兵無常勢",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.14,aoe:2},
+ {name:"兵鋒",type:"被動",rate:1,kind:"buff",pow:0.1},
+ {name:"勇者得前",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.35,aoe:2},
+ {name:"士爭先赴",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.4,aoe:2},
+ {name:"夢中弒臣",type:"被動",rate:1,kind:"counter",pow:0.5},
+ {name:"大戟士",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},
+ {name:"奇計良謀",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.5,aoe:2},
+ {name:"定謀貴決",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.16,aoe:3},
+ {name:"形機軍略",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.45,aoe:2},
+ {name:"所向披靡",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.5,aoe:2},
+ {name:"挫銳",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.12,aoe:2},
+ {name:"智計",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.3,aoe:1,ctrl:0.3},
+ {name:"橫戈躍馬",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.55,aoe:1},
+ {name:"沉沙決水",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.4,aoe:2},
+ {name:"焰逐風飛",type:"主動",rate:0.35,kind:"dot",stat:"zhi",pow:1.4,aoe:2},
+ {name:"熯天熾地",type:"主動",rate:0.35,kind:"dot",stat:"zhi",pow:1.5,aoe:2},
+ {name:"用武通神",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.7,aoe:1},
+ {name:"白毦兵",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},
+ {name:"白馬義從",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},
+ {name:"益其金鼓",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:1.0,aoe:2},
+ {name:"瞋目橫矛",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.5,aoe:2,ctrl:0.3},
+ {name:"破陣摧堅",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.6,aoe:1},
+ {name:"結盟",type:"指揮",rate:1,kind:"shield",pow:0.14,aoe:2},
+ {name:"經術政要",type:"內政",rate:0,kind:"none"},
+ {name:"義心昭烈",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:1.1,aoe:2},
+ {name:"臥薪嚐膽",type:"被動",rate:1,kind:"buff",pow:0.14},
+ {name:"臨機制勝",type:"被動",rate:1,kind:"buff",pow:0.12},
+ {name:"舌戰群儒",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.5,aoe:1,ctrl:0.3},
+ {name:"西涼鐵騎",type:"兵種",rate:1,kind:"buff",pow:0.13,aoe:3},
+ {name:"誘敵深入",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.15,aoe:2},
+ {name:"象兵",type:"兵種",rate:1,kind:"shield",pow:0.12,aoe:3},
+ {name:"運籌決算",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.5,aoe:2},
+ {name:"風助火勢",type:"指揮",rate:1,kind:"buff",pow:0.14,aoe:2},
+ {name:"魅惑",type:"主動",rate:0.45,kind:"ctrl",aoe:1,ctrl:0.5},
+ {name:"黃天泰平",type:"主動",rate:0.4,kind:"heal",stat:"zhi",pow:1.15,aoe:2},
+ // ---- sgsdeck 隊伍配置/傳承補齊(參數近似) ----
+ {name:"三勢陣",type:"陣法",rate:1,kind:"buff",pow:0.16,aoe:3},
+ {name:"上兵伐謀",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.16,aoe:2},
+ {name:"以寡敵眾",type:"被動",rate:1,kind:"buff",pow:0.15},
+ {name:"先登死士",type:"兵種",rate:1,kind:"buff",pow:0.13,aoe:3},
+ {name:"功不唐捐",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:1.0,aoe:2},
+ {name:"千里走單騎",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.55,aoe:1},
+ {name:"因利制權",type:"被動",rate:1,kind:"buff",pow:0.12},
+ {name:"強攻",type:"主動",rate:0.5,kind:"dmg",stat:"wu",pow:1.3,aoe:1},
+ {name:"形一陣",type:"陣法",rate:1,kind:"buff",pow:0.15,aoe:3},
+ {name:"御敵屏障",type:"指揮",rate:1,kind:"shield",pow:0.18,aoe:2},
+ {name:"忠勇義烈",type:"指揮",rate:1,kind:"buff",pow:0.14,aoe:2},
+ {name:"掣刀斫敵",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.6,aoe:1},
+ {name:"摧鋒斷刃",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.5,aoe:1},
+ {name:"撫輯軍民",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:1.05,aoe:2},
+ {name:"據水斷橋",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.4,aoe:2,ctrl:0.3},
+ {name:"整軍經武",type:"指揮",rate:1,kind:"buff",pow:0.13,aoe:3},
+ {name:"止戈為武",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:2},
+ {name:"氣凌三軍",type:"主動",rate:0.45,kind:"ctrl",aoe:2,ctrl:0.4},
+ {name:"深藏若虛",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:2},
+ {name:"深謀遠慮",type:"被動",rate:1,kind:"buff",pow:0.12},
+ {name:"焚輜營壘",type:"主動",rate:0.35,kind:"dot",stat:"zhi",pow:1.4,aoe:2},
+ {name:"獨行赴鬥",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.5,aoe:1},
+ {name:"眾動萬計",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.4,aoe:2},
+ {name:"知己知彼",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.14,aoe:2},
+ {name:"移花接木",type:"主動",rate:0.4,kind:"drain",stat:"zhi",pow:1.2,aoe:1},
+ {name:"精・鋒矢陣",type:"陣法",rate:1,kind:"buff",pow:0.2,aoe:1},
+ {name:"精・魚鱗陣",type:"陣法",rate:1,kind:"shield",pow:0.18,aoe:3},
+ {name:"絕其汲道",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:1.3,aoe:2},
+ {name:"絕計折謀",type:"主動",rate:0.4,kind:"debuff",stat:"zhi",pow:0.18,aoe:2},
+ {name:"臨危救主",type:"指揮",rate:1,kind:"shield",pow:0.18,aoe:2},
+ {name:"臻於至善",type:"被動",rate:1,kind:"buff",pow:0.12},
+ {name:"萬軍奪帥",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.7,aoe:1},
+ {name:"蓄勢待發",type:"被動",rate:1,kind:"buff",pow:0.13},
+ {name:"藏器待時",type:"被動",rate:1,kind:"buff",pow:0.13},
+ {name:"虎踞鷹揚",type:"被動",rate:1,kind:"buff",pow:0.14},
+ {name:"解煩衛",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},
+ {name:"赴湯蹈火",type:"被動",rate:1,kind:"counter",pow:0.5},
+ {name:"避實擊虛",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.35,aoe:1},
+ {name:"鋒芒畢露",type:"被動",rate:1,kind:"buff",pow:0.13},
+ {name:"靈機一動",type:"被動",rate:1,kind:"buff",pow:0.12},
+ {name:"青州兵",type:"兵種",rate:1,kind:"buff",pow:0.12,aoe:3},
+ {name:"韜心惑敵",type:"指揮",rate:1,kind:"debuff",stat:"zhi",pow:0.15,aoe:2},
+ {name:"風聲鶴唳",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:1.35,aoe:1},
+];
+
+/* 六大系兵書(照官方週年前瞻圖+老兵書調優;效果為近似期望值)
+   sys=兵書系 tier=big大兵書/small小兵書 */
+const SYS_ORDER=["始計","虛實","軍形","九變","作戰","用間"];
+const BOOKS = {
+ "枕戈坐甲":{sys:"始計",tier:"big",g:0.04},
+ "三軍之眾":{sys:"始計",tier:"big",h:0.012},
+ "洞若觀火":{sys:"始計",tier:"big",g:0.02},
+ "樂善好施":{sys:"始計",tier:"big",heal:0.25},
+ "應機立斷":{sys:"始計",tier:"big",d:0.12,once:true},
+ "神清氣淨":{sys:"始計",tier:"big",g:0.015},
+ "久戰":{sys:"始計",tier:"small",d:0.03},
+ "遠謀":{sys:"始計",tier:"small",dot:0.06},
+ "銳利":{sys:"始計",tier:"small",r:0.02,only:"突擊"},
+ "歸心":{sys:"始計",tier:"small",r:0.03,only:"準備"},
+ "錘煉":{sys:"始計",tier:"small",dotdef:0.1},
+ "統軍":{sys:"始計",tier:"small",tong:20.0},
+ "兵行詭道":{sys:"用間",tier:"big",g:0.75,turn:2.0,once:true},
+ "以退為進":{sys:"用間",tier:"big",g:0.15},
+ "千里疾行":{sys:"用間",tier:"big",r:0.2,only:"突擊",selfdebuff:true},
+ "審時度勢":{sys:"用間",tier:"big",heal:0.12,selfvuln:0.03},
+ "以直報怨":{sys:"用間",tier:"big",counter:0.5,onctrl:true},
+ "出奇制勝":{sys:"用間",tier:"big",r:0.3,only:"自帶",selfdebuff:true},
+ "開闔":{sys:"用間",tier:"small",g:0.06,aftercast:true},
+ "仙姿":{sys:"用間",tier:"small",d:0.04},
+ "持重":{sys:"用間",tier:"small",immune:"混亂"},
+ "精准":{sys:"用間",tier:"small",pierce:true},
+ "善戰":{sys:"用間",tier:"small",d:0.04,stack:8.0},
+ "分利":{sys:"用間",tier:"small",g:0.02,stack:5.0},
+ "一鼓作氣":{sys:"作戰",tier:"big",d:0.05,only:"突擊"},
+ "勝而益強":{sys:"作戰",tier:"big",h:0.02},
+ "不勇則死":{sys:"作戰",tier:"big",d:0.06,turn:5.0,nohealSelf:true},
+ "奇正相生":{sys:"作戰",tier:"big",d:0.05},
+ "蠻勇非勇":{sys:"作戰",tier:"big",d:0.045},
+ "勝益而強":{sys:"作戰",tier:"big",d:0.04},
+ "武略":{sys:"作戰",tier:"small",d:0.045},
+ "勝戰":{sys:"作戰",tier:"small",d:0.045},
+ "藏刀":{sys:"作戰",tier:"small",d:0.04},
+ "執銳":{sys:"作戰",tier:"small",d:0.055},
+ "文韜":{sys:"作戰",tier:"small",d:0.055},
+ "全智":{sys:"作戰",tier:"small",d:0.02},
+ "後發先至":{sys:"虛實",tier:"big",r:0.02,only:"準備",firststrike:true},
+ "謀定後動":{sys:"虛實",tier:"big",d:0.1,prep:true},
+ "攻其不備":{sys:"虛實",tier:"big",d:0.05,vsmaxhp:true},
+ "以治擊亂":{sys:"虛實",tier:"big",d:0.06,vsctrl:true},
+ "順天應時":{sys:"虛實",tier:"big",dot:0.05,extend:true},
+ "大謀不謀":{sys:"虛實",tier:"big",d:0.05,crit:true},
+ "鬼謀":{sys:"虛實",tier:"small",d:0.055},
+ "神機":{sys:"虛實",tier:"small",r:0.02},
+ "將威":{sys:"虛實",tier:"small",d:0.05},
+ "占卜":{sys:"虛實",tier:"small",h:0.012},
+ "妙算":{sys:"虛實",tier:"small",r:0.025},
+ "嚴陣以待":{sys:"軍形",tier:"big",g:0.04,turn:2.0,share:true},
+ "避其銳氣":{sys:"軍形",tier:"big",g:0.04,turn:2.0,dodge:true},
+ "守而有道":{sys:"軍形",tier:"big",g:0.05,only:"謀略"},
+ "無戰而勝":{sys:"軍形",tier:"big",g:0.04,onctrl:true},
+ "三里而還":{sys:"軍形",tier:"big",counter:0.5,turn:3.0},
+ "剛柔":{sys:"軍形",tier:"big",heal:0.09},
+ "剛柔小":{sys:"軍形",tier:"small",heal:0.09},
+ "防備":{sys:"軍形",tier:"small",g:0.045},
+ "守勢":{sys:"軍形",tier:"small",g:0.04},
+ "靜心":{sys:"軍形",tier:"small",g:0.055},
+ "鐵甲":{sys:"軍形",tier:"small",g:0.055},
+ "嚴陣":{sys:"軍形",tier:"small",g:0.03},
+ "援其必攻":{sys:"九變",tier:"big",h:0.015,lowest:true},
+ "誘敵之策":{sys:"九變",tier:"big",d:0.06,selfvuln:0.04,allybuff:true},
+ "無功而勵":{sys:"九變",tier:"big",h:0.02,onctrl:true},
+ "示敵以弱":{sys:"九變",tier:"big",r:0.07,turn:4.0,earlydown:true},
+ "臨敵不亂":{sys:"九變",tier:"big",cleanse:true,turn:4.0},
+ "散仙":{sys:"九變",tier:"big",dodge:0.175},
+ "勵軍":{sys:"九變",tier:"small",h:0.015},
+ "救主":{sys:"九變",tier:"small",g:0.03,share:true},
+ "速戰":{sys:"九變",tier:"small",d:0.03},
+ "掩虛":{sys:"九變",tier:"small",g:0.04},
+ "馳援":{sys:"九變",tier:"small",h:0.015},
+ "誘敵":{sys:"九變",tier:"small",d:0.03},
+ "三裡而還":{sys:"軍形",tier:"big",counter:0.5,turn:3},
+ "以直抱怨":{sys:"用間",tier:"big",counter:0.5,onctrl:true},
+ "分而疾戰":{sys:"作戰",tier:"big",d:0.04},
+ "勇毅":{sys:"軍形",tier:"small",g:0.03},
+ "合變":{sys:"虛實",tier:"small",r:0.02},
+ "惜兵愛民":{sys:"軍形",tier:"small",g:0.035},
+ "疾戰突圍":{sys:"作戰",tier:"big",d:0.04},
+ "百戰":{sys:"作戰",tier:"small",d:0.035},
+};
+
+/* PK-S26 推薦隊伍(sgsdeck,108套;兵書已歸位為 系/大/小/小) */
+const PRESETS = [
+ {name:"— 自行配置 —",team:null},
+ {name:"[T0] sp周瑜弓(SP貂蟬/SP周瑜/曹操)",team:[["SP貂蟬",["合軍聚眾","勠力同心"],["始計","三軍之眾","久戰",""]],["SP周瑜",["眾志成城","剛柔並濟"],["始計","應機立斷","久戰",""]],["曹操",["潛龍陣","草船借箭"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 仙人盾-by大米(張角/于吉/左慈)",team:[["張角",["太平道法","士別三日"],["作戰","疾戰突圍","鬼謀",""]],["于吉",["鋒矢陣","草船借箭"],["九變","臨敵不亂","散仙",""]],["左慈",["竭力佐謀","刮骨療毒"],["九變","援其必攻","散仙",""]]]},
+ {name:"[T0] 冠軍槍(SP關羽/SP荀彧/SP呂蒙)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","分而疾戰","百戰","掩虛"]],["SP荀彧",["非攻制勝","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["SP呂蒙",["草船借箭","三勢陣"],["九變","臨敵不亂","救主","掩虛"]]]},
+ {name:"[T0] 周劭蜀弓(諸葛亮/龐統/周劭)",team:[["諸葛亮",["雁行陣","刮骨療毒"],["始計","三軍之眾","錘煉",""]],["龐統",["太平道法","士別三日"],["虛實","後發先至","鬼謀",""]],["周劭",["當鋒摧決","乘敵不虞"],["始計","三軍之眾","銳利",""]]]},
+ {name:"[T0] 嘟嘟弓(sp周瑜)(SP周瑜/陸遜/SP呂蒙)",team:[["SP周瑜",["刮骨療毒","勠力同心"],["始計","應機立斷","錘煉",""]],["陸遜",["功不唐捐","刮骨療毒"],["用間","出奇制勝","精准",""]],["SP呂蒙",["草船借箭","雁行陣"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 嘟嘟弓(周瑜)(周瑜/陸遜/SP呂蒙)",team:[["周瑜",["奪魂挾魄","上兵伐謀"],["作戰","勝益而強","文韜",""]],["陸遜",["功不唐捐","刮骨療毒"],["用間","出奇制勝","精准",""]],["SP呂蒙",["草船借箭","雁行陣"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 太尉盾(司馬懿/曹操/滿寵)",team:[["司馬懿",["熯天熾地","用武通神"],["軍形","惜兵愛民","勇毅","防備"]],["曹操",["魅惑","撫輯軍民"],["九變","臨敵不亂","救主","掩虛"]],["滿寵",["鋒矢陣","刮骨療毒"],["九變","援其必攻","勵軍","掩虛"]]]},
+ {name:"[T0] 太尉盾-by大米(司馬懿/曹操/滿寵)",team:[["司馬懿",["熯天熾地","眾志成城"],["始計","樂善好施","久戰",""]],["曹操",["藤甲兵","魅惑"],["始計","三軍之眾","錘煉",""]],["滿寵",["形一陣","蓄勢待發"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 太師弓(SP盧植/SP貂蟬/SP董卓)",team:[["SP盧植",["雁行陣","剛柔並濟"],["始計","三軍之眾","久戰",""]],["SP貂蟬",["勠力同心","深藏若虛"],["始計","三軍之眾","久戰",""]],["SP董卓",["上兵伐謀","熯天熾地"],["始計","三軍之眾","久戰",""]]]},
+ {name:"[T0] 富貴騎(SP荀彧/SP郭嘉/賈詡)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["始計","三軍之眾","錘煉",""]],["SP郭嘉",["奪魂挾魄","上兵伐謀"],["虛實","大謀不謀","鬼謀",""]],["賈詡",["靈機一動","勠力同心"],["始計","三軍之眾","久戰",""]]]},
+ {name:"[T0] 山河盾(曹操/賈詡/郝昭)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","勵軍","掩虛"]],["賈詡",["奪魂挾魄","偽書相間"],["作戰","奇正相生","文韜","執銳"]],["郝昭",["士別三日","刮骨療毒"],["作戰","蠻勇非勇","文韜","執銳"]]]},
+ {name:"[T0] 山河盾-by大米(曹操/賈詡/郝昭)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","援其必攻","勵軍",""]],["賈詡",["奪魂挾魄","當鋒摧決"],["作戰","奇正相生","文韜",""]],["郝昭",["刮骨療毒","士別三日"],["作戰","蠻勇非勇","文韜",""]]]},
+ {name:"[T0] 張飛盾(潛龍)(周泰/張飛/SP袁紹)",team:[["周泰",["盛氣凌敵","潛龍陣"],["軍形","守而有道","守勢",""]],["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["SP袁紹",["陷陣營","掣刀斫敵"],["作戰","蠻勇非勇","勝戰",""]]]},
+ {name:"[T0] 法關盾(劉備)(SP關羽/SP法正/劉備)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["劉備",["魚鱗陣","藤甲兵"],["九變","援其必攻","速戰",""]]]},
+ {name:"[T0] 法關盾(馬岱)(SP關羽/SP法正/馬岱)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["馬岱",["魚鱗陣","藤甲兵"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 溫侯弓(混)(左慈/呂布/許攸)",team:[["左慈",["武鋒陣","錦帆軍"],["九變","援其必攻","散仙","勵軍"]],["呂布",["暴戾無仁","速乘其利"],["作戰","一鼓作氣","勝戰","執銳"]],["許攸",["非攻制勝","當鋒摧決"],["作戰","奇正相生","文韜","藏刀"]]]},
+ {name:"[T0] 溫侯弓-by大米(許攸/呂布/左慈)",team:[["許攸",["臨危救主","武鋒陣"],["始計","枕戈坐甲","錘煉",""]],["呂布",["當鋒摧決","摧鋒斷刃"],["用間","出奇制勝","精准",""]],["左慈",["先登死士","草船借箭"],["九變","援其必攻","掩虛",""]]]},
+ {name:"[T0] 狗官槍(SP關羽/SP荀彧/程普)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","分而疾戰","百戰","掩虛"]],["SP荀彧",["非攻制勝","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["程普",["草船借箭","潛龍陣"],["九變","臨敵不亂","救主","掩虛"]]]},
+ {name:"[T0] 狗官騎(曹操/SP郭嘉/荀彧)",team:[["曹操",["草船借箭","飛熊軍"],["九變","臨敵不亂","勵軍","掩虛"]],["SP郭嘉",["奪魂挾魄","當鋒摧決"],["作戰","奇正相生","文韜","執銳"]],["荀彧",["竭力佐謀","刮骨療毒"],["九變","援其必攻","掩虛","勵軍"]]]},
+ {name:"[T0] 皇冠槍(SP關羽/SP皇甫嵩/SP荀彧)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","分而疾戰","百戰","掩虛"]],["SP皇甫嵩",["草船借箭","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["SP荀彧",["非攻制勝","三勢陣"],["九變","臨敵不亂","救主","掩虛"]]]},
+ {name:"[T0] 皇吳槍(孫權/程普/魯肅)",team:[["孫權",["當鋒摧決","兵無常勢"],["作戰","勝而益強","文韜","執銳"]],["程普",["草船借箭","撫輯軍民"],["軍形","無戰而勝","守勢","防備"]],["魯肅",["鋒矢陣","白毦兵"],["軍形","惜兵愛民","防備","守勢"]]]},
+ {name:"[T0] 皇馬(SP馬超/SP皇甫嵩/許攸)",team:[["SP馬超",["當鋒摧決","速乘其利"],["作戰","勝而益強","藏刀","執銳"]],["SP皇甫嵩",["草船借箭","臨危救主"],["九變","援其必攻","救主","馳援"]],["許攸",["威謀靡亢","解煩衛"],["虛實","後發先至","妙算","占卜"]]]},
+ {name:"[T0] 皇馬(混)(SP馬超/SP皇甫嵩/許攸)",team:[["SP馬超",["當鋒摧決","速乘其利"],["作戰","勝而益強","藏刀","執銳"]],["SP皇甫嵩",["草船借箭","臨危救主"],["九變","援其必攻","救主","馳援"]],["許攸",["威謀靡亢","解煩衛"],["虛實","後發先至","妙算","占卜"]]]},
+ {name:"[T0] 皇馬槍(SP馬超/SP皇甫嵩/許攸)",team:[["SP馬超",["當鋒摧決","摧鋒斷刃"],["九變","援其必攻","速戰",""]],["SP皇甫嵩",["草船借箭","臨危救主"],["用間","審時度勢","開闔",""]],["許攸",["乘敵不虞","解煩衛"],["虛實","後發先至","妙算",""]]]},
+ {name:"[T0] 盛氣蜀弓(姜維/龐統/諸葛亮)",team:[["姜維",["奪魂挾魄","上兵伐謀"],["作戰","蠻勇非勇","文韜",""]],["龐統",["太平道法","無當飛軍"],["虛實","後發先至","鬼謀",""]],["諸葛亮",["當鋒摧決","盛氣凌敵"],["作戰","奇正相生","文韜",""]]]},
+ {name:"[T0] 等風熊(姜維/劉備/關銀屏)",team:[["姜維",["上兵伐謀","士別三日"],["作戰","蠻勇非勇","文韜",""]],["劉備",["鋒矢陣","刮骨療毒"],["九變","援其必攻","勵軍",""]],["關銀屏",["飛熊軍","草船借箭"],["作戰","分而疾戰","速戰",""]]]},
+ {name:"[T0] 網紅槍(張飛/關銀屏/黃月英)",team:[["張飛",["裸衣血戰","摧鋒斷刃"],["用間","以直抱怨","精准",""]],["關銀屏",["疾風驟雨","橫掃千軍"],["虛實","以治擊亂","鬼謀",""]],["黃月英",["盛氣凌敵","大戟士"],["九變","誘敵之策","勵軍",""]]]},
+ {name:"[T0] 群弓(SP袁紹/SP朱儁/沮授)",team:[["SP袁紹",["威謀靡亢","縱兵劫掠"],["作戰","勝而益強","勝戰","執銳"]],["SP朱儁",["無當飛軍","焰逐風飛"],["虛實","以治擊亂","將威","神機"]],["沮授",["八門金鎖陣","嬰城自守"],["作戰","奇正相生","文韜","執銳"]]]},
+ {name:"[T0] 群弓-by大米(SP袁紹/SP朱儁/沮授)",team:[["SP袁紹",["掣刀斫敵","疾風驟雨"],["作戰","勝益而強","勝戰",""]],["SP朱儁",["焰逐風飛","焚輜營壘"],["虛實","以治擊亂","神機",""]],["沮授",["八門金鎖陣","無當飛軍"],["作戰","奇正相生","文韜",""]]]},
+ {name:"[T0] 蘇信神火弓(周瑜/呂蒙/蘇信)",team:[["周瑜",["奪魂挾魄","上兵伐謀"],["作戰","勝益而強","文韜",""]],["呂蒙",["當鋒摧決","眾志成城"],["作戰","奇正相生","文韜",""]],["蘇信",["精・鋒矢陣","草船借箭"],["九變","臨敵不亂","勵軍",""]]]},
+ {name:"[T0] 西風騎(姜維/趙雲/劉備)",team:[["姜維",["上兵伐謀","士別三日"],["作戰","蠻勇非勇","文韜",""]],["趙雲",["威謀靡亢","草船借箭"],["始計","樂善好施","歸心",""]],["劉備",["鋒矢陣","飛熊軍"],["九變","援其必攻","勵軍",""]]]},
+ {name:"[T0] 關星盾(SP關羽/SP法正/無雙星彩)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["無雙星彩",["魚鱗陣","藤甲兵"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 關關張-by大米(關羽/張飛/關銀屏)",team:[["關羽",["箕形陣","威謀靡亢"],["虛實","後發先至","鬼謀",""]],["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["關銀屏",["盛氣凌敵","青州兵"],["虛實","以治擊亂","神機",""]]]},
+ {name:"[T0] 陳翊槍(張飛/關羽/陳翊)",team:[["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["關羽",["千里走單騎","盛氣凌敵"],["虛實","後發先至","鬼謀",""]],["陳翊",["奇計良謀","挫銳"],["作戰","蠻勇非勇","勝戰",""]]]},
+ {name:"[T0] 陳翊盾(張飛/關羽/陳翊)",team:[["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["關羽",["盛氣凌敵","絕其汲道"],["虛實","後發先至","鬼謀",""]],["陳翊",["陷陣營","箕形陣"],["軍形","守而有道","守勢",""]]]},
+ {name:"[T0] 陳翊神火弓(周瑜/呂蒙/陳翊)",team:[["周瑜",["奪魂挾魄","上兵伐謀"],["作戰","勝益而強","文韜",""]],["呂蒙",["當鋒摧決","眾志成城"],["作戰","奇正相生","文韜",""]],["陳翊",["精・鋒矢陣","深謀遠慮"],["始計","三軍之眾","久戰",""]]]},
+ {name:"[T0] 飛熊魏法騎(SP荀彧/賈詡/SP郭嘉)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["軍形","惜兵愛民","守勢","防備"]],["賈詡",["嬰城自守","飛熊軍"],["九變","示敵以弱","百戰","掩虛"]],["SP郭嘉",["奪魂挾魄","折衝禦侮"],["作戰","奇正相生","文韜","執銳"]]]},
+ {name:"[T0] 黃巾盾(張角/SP張寶/SP張梁)",team:[["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["SP張寶",["草船借箭","藤甲兵"],["軍形","無戰而勝","守勢","防備"]],["SP張梁",["暫避其鋒","刮骨療毒"],["九變","臨敵不亂","勵軍","掩虛"]]]},
+ {name:"[T0.5] 三仙盾(張角/于吉/左慈)",team:[["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["于吉",["草船借箭","藤甲兵"],["九變","臨敵不亂","散仙","掩虛"]],["左慈",["暫避其鋒","刮骨療毒"],["九變","援其必攻","散仙","掩虛"]]]},
+ {name:"[T0.5] 三勢呂(呂布/郭嘉/黃月英)",team:[["呂布",["一騎當千","百騎劫營"],["作戰","一鼓作氣","勝戰","執銳"]],["郭嘉",["當鋒摧決","虎豹騎"],["作戰","奇正相生","文韜","藏刀"]],["黃月英",["三勢陣","鐵騎驅馳"],["九變","誘敵之策","勵軍","全智"]]]},
+ {name:"[T0.5] 三勢賈(賈詡/趙雲/左慈)",team:[["賈詡",["偽書相間","刮骨療毒"],["虛實","以治擊亂","神機","鬼謀"]],["趙雲",["破陣摧堅","所向披靡"],["虛實","以治擊亂","神機","鬼謀"]],["左慈",["三勢陣","象兵"],["九變","援其必攻","散仙","掩虛"]]]},
+ {name:"[T0.5] 北伐槍(SP諸葛亮/關興/張苞)",team:[["SP諸葛亮",["知己知彼","草船借箭"],["九變","援其必攻","速戰",""]],["關興",["千里走單騎","文武雙全"],["虛實","後發先至","鬼謀",""]],["張苞",["非攻制勝","因利制權"],["軍形","惜兵愛民","守勢",""]]]},
+ {name:"[T0.5] 千機盾(周劭/張角/左慈)",team:[["周劭",["武鋒陣","草船借箭"],["始計","三軍之眾","錘煉",""]],["張角",["太平道法","士別三日"],["始計","三軍之眾","歸心",""]],["左慈",["竭力佐謀","刮骨療毒"],["九變","援其必攻","散仙",""]]]},
+ {name:"[T0.5] 吳騎(周泰/孫尚香/凌統)",team:[["周泰",["西涼鐵騎","盛氣凌敵"],["軍形","守而有道","防備","守勢"]],["孫尚香",["裸衣血戰","百騎劫營"],["作戰","勝而益強","勝戰","執銳"]],["凌統",["破軍威勝","橫掃千軍"],["虛實","以治擊亂","鬼謀","將威"]]]},
+ {name:"[T0.5] 吳騎-by大米(周泰/孫尚香/凌統)",team:[["周泰",["西涼鐵騎","盛氣凌敵"],["軍形","守而有道","守勢",""]],["孫尚香",["裸衣血戰","虎踞鷹揚"],["作戰","勝益而強","勝戰",""]],["凌統",["破軍威勝","橫掃千軍"],["作戰","勝益而強","勝戰",""]]]},
+ {name:"[T0.5] 周劭富貴騎(SP荀彧/SP郭嘉/周劭)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["始計","三軍之眾","錘煉",""]],["SP郭嘉",["奪魂挾魄","上兵伐謀"],["虛實","大謀不謀","鬼謀",""]],["周劭",["靈機一動","勠力同心"],["始計","三軍之眾","久戰",""]]]},
+ {name:"[T0.5] 墩墩盾(曹操/夏侯惇/滿寵)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","救主","掩虛"]],["夏侯惇",["魅惑","氣凌三軍"],["軍形","無戰而勝","鐵甲","守勢"]],["滿寵",["非攻制勝","鋒矢陣"],["九變","援其必攻","勵軍","掩虛"]]]},
+ {name:"[T0.5] 大小喬香(無雙大喬/孫尚香/無雙小喬)",team:[["無雙大喬",["魅惑","草船借箭"],["始計","洞若觀火","錘煉",""]],["孫尚香",["當鋒摧決","摧鋒斷刃"],["作戰","勝益而強","勝戰",""]],["無雙小喬",["錦帆軍","非攻制勝"],["始計","枕戈坐甲","錘煉",""]]]},
+ {name:"[T0.5] 女王盾(司馬懿/張春華/滿寵)",team:[["司馬懿",["臨機制勝","士別三日"],["始計","三軍之眾","久戰",""]],["張春華",["鋒矢陣","魅惑"],["始計","三軍之眾","錘煉",""]],["滿寵",["藤甲兵","刮骨療毒"],["九變","援其必攻","速戰",""]]]},
+ {name:"[T0.5] 奸雄騎(曹操/張遼/夏侯淵)",team:[["曹操",["鐵騎驅馳","虎豹騎"],["軍形","嚴陣以待","守勢","防備"]],["張遼",["當鋒摧決","速乘其利"],["作戰","一鼓作氣","勝戰","藏刀"]],["夏侯淵",["裸衣血戰","百騎劫營"],["作戰","一鼓作氣","勝戰","執銳"]]]},
+ {name:"[T0.5] 孫權吳騎(孫權/凌統/周泰)",team:[["孫權",["一騎當千","百騎劫營"],["作戰","一鼓作氣","勝戰",""]],["凌統",["裸衣血戰","當鋒摧決"],["九變","臨敵不亂","速戰",""]],["周泰",["虎豹騎","鋒矢陣"],["軍形","惜兵愛民","鐵甲",""]]]},
+ {name:"[T0.5] 孫權弓(孫權/陸遜/SP呂蒙)",team:[["孫權",["當鋒摧決","兵無常勢"],["作戰","勝益而強","文韜",""]],["陸遜",["功不唐捐","刮骨療毒"],["始計","三軍之眾","久戰",""]],["SP呂蒙",["草船借箭","魅惑"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0.5] 徐彥張角盾(張角/徐彥/左慈)",team:[["張角",["太平道法","士別三日"],["始計","三軍之眾","歸心",""]],["徐彥",["鋒矢陣","蓄勢待發"],["始計","三軍之眾","錘煉",""]],["左慈",["竭力佐謀","刮骨療毒"],["九變","援其必攻","散仙",""]]]},
+ {name:"[T0.5] 慷慨弓(甘寧/太史慈/SP呂蒙)",team:[["甘寧",["錦帆軍","草船借箭"],["始計","樂善好施","錘煉",""]],["太史慈",["當鋒摧決","摧鋒斷刃"],["作戰","勝益而強","勝戰",""]],["SP呂蒙",["臨危救主","乘敵不虞"],["虛實","後發先至","妙算",""]]]},
+ {name:"[T0.5] 拒馬弓(SP盧植/蕭芷/SP貂蟬)",team:[["SP盧植",["剛柔並濟","因利制權"],["始計","三軍之眾","久戰",""]],["蕭芷",["先登死士","雁行陣"],["始計","三軍之眾","久戰",""]],["SP貂蟬",["深藏若虛","勠力同心"],["始計","三軍之眾","久戰",""]]]},
+ {name:"[T0.5] 曹操魏法盾(曹操/賈詡/郝昭)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","勵軍","掩虛"]],["賈詡",["奪魂挾魄","偽書相間"],["作戰","奇正相生","文韜","執銳"]],["郝昭",["士別三日","刮骨療毒"],["作戰","蠻勇非勇","文韜","執銳"]]]},
+ {name:"[T0.5] 桃園盾(劉備/張飛/關羽)",team:[["劉備",["暫避其鋒","陷陣營"],["九變","援其必攻","掩虛","勵軍"]],["張飛",["擊其惰歸","剛勇無前"],["虛實","以治擊亂","將威","鬼謀"]],["關羽",["威謀靡亢","箕形陣"],["虛實","後發先至","鬼謀","合變"]]]},
+ {name:"[T0.5] 榮光騎(SP荀彧/張遼/曹操)",team:[["SP荀彧",["暫避其鋒","刮骨療毒"],["九變","援其必攻","勵軍","掩虛"]],["張遼",["當鋒摧決","暴戾無仁"],["作戰","一鼓作氣","勝戰","藏刀"]],["曹操",["鐵騎驅馳","虎豹騎"],["軍形","嚴陣以待","守勢","防備"]]]},
+ {name:"[T0.5] 沈姮富貴騎(SP荀彧/SP郭嘉/沈姮)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["始計","三軍之眾","錘煉",""]],["SP郭嘉",["奪魂挾魄","當鋒摧決"],["作戰","奇正相生","文韜",""]],["沈姮",["靈機一動","上兵伐謀"],["虛實","大謀不謀","鬼謀",""]]]},
+ {name:"[T0.5] 淵騎(夏侯淵/曹操/郭嘉)",team:[["夏侯淵",["裸衣血戰","一騎當千"],["作戰","一鼓作氣","勝戰","執銳"]],["曹操",["鋒矢陣","鐵騎驅馳"],["軍形","嚴陣以待","守勢","防備"]],["郭嘉",["折衝禦侮","當鋒摧決"],["作戰","奇正相生","文韜","藏刀"]]]},
+ {name:"[T0.5] 滿寵魏法盾(曹操/賈詡/滿寵)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","勵軍","掩虛"]],["賈詡",["奪魂挾魄","偽書相間"],["作戰","奇正相生","文韜","執銳"]],["滿寵",["刮骨療毒","士別三日"],["九變","援其必攻","勵軍","掩虛"]]]},
+ {name:"[T0.5] 潛龍陣(賈詡/趙雲/左慈)",team:[["賈詡",["潛龍陣","偽書相間"],["虛實","以治擊亂","神機","鬼謀"]],["趙雲",["草船借箭","威謀靡亢"],["九變","援其必攻","勵軍","掩虛"]],["左慈",["象兵","刮骨療毒"],["九變","援其必攻","散仙","掩虛"]]]},
+ {name:"[T0.5] 皇甫宏皇馬槍(SP馬超/皇甫宏/許攸)",team:[["SP馬超",["當鋒摧決","摧鋒斷刃"],["九變","援其必攻","速戰",""]],["皇甫宏",["草船借箭","魅惑"],["用間","審時度勢","開闔",""]],["許攸",["臨危救主","解煩衛"],["虛實","後發先至","妙算",""]]]},
+ {name:"[T0.5] 皇甫法關盾(SP關羽/皇甫宏/SP法正)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["皇甫宏",["魚鱗陣","魅惑"],["始計","三軍之眾","錘煉",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0.5] 蕭芷太尉盾(司馬懿/蕭芷/滿寵)",team:[["司馬懿",["熯天熾地","眾志成城"],["始計","三軍之眾","久戰",""]],["蕭芷",["獨行赴鬥","魅惑"],["始計","三軍之眾","錘煉",""]],["滿寵",["形一陣","蓄勢待發"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0.5] 蘇信孫權騎(孫權/蘇信/周泰)",team:[["孫權",["文武雙全","當鋒摧決"],["作戰","勝益而強","執銳",""]],["蘇信",["鋒矢陣","奇計良謀"],["始計","三軍之眾","錘煉",""]],["周泰",["合軍聚眾","飛熊軍"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0.5] 虎臣弓(甘寧/太史慈/周泰)",team:[["甘寧",["破軍威勝","橫掃千軍"],["虛實","以治擊亂","鬼謀","將威"]],["太史慈",["折衝禦侮","當鋒摧決"],["作戰","勝而益強","武略","執銳"]],["周泰",["盛氣凌敵","錦帆軍"],["軍形","守而有道","防備","守勢"]]]},
+ {name:"[T0.5] 蜀智(SP諸葛亮/龐統/法正)",team:[["SP諸葛亮",["草船借箭","撫輯軍民"],["九變","援其必攻","勵軍","速戰"]],["龐統",["太平道法","士別三日"],["虛實","後發先至","鬼謀","將威"]],["法正",["刮骨療毒","暫避其鋒"],["九變","援其必攻","百戰","掩虛"]]]},
+ {name:"[T0.5] 詩詩盾(張角/劉備/魯肅)",team:[["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["劉備",["草船借箭","撫輯軍民"],["九變","援其必攻","掩虛","勵軍"]],["魯肅",["暫避其鋒","鋒矢陣"],["軍形","惜兵愛民","防備","守勢"]]]},
+ {name:"[T0.5] 貂蟬武鋒(貂蟬/張角/左慈)",team:[["貂蟬",["魅惑","武鋒陣"],["九變","示敵以弱","百戰","掩虛"]],["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["左慈",["刮骨療毒","暫避其鋒"],["九變","援其必攻","散仙","掩虛"]]]},
+ {name:"[T0.5] 遼姬騎(王元姬/張遼/郭嘉)",team:[["王元姬",["暫避其鋒","鋒矢陣"],["九變","援其必攻","勵軍","掩虛"]],["張遼",["當鋒摧決","速乘其利"],["作戰","一鼓作氣","勝戰","藏刀"]],["郭嘉",["鐵騎驅馳","虎豹騎"],["軍形","嚴陣以待","守勢","防備"]]]},
+ {name:"[T0.5] 關關張(關羽/關銀屏/張飛)",team:[["關羽",["威謀靡亢","箕形陣"],["虛實","後發先至","鬼謀","合變"]],["關銀屏",["據水斷橋","青州兵"],["虛實","以治擊亂","神機",""]],["張飛",["疾風驟雨","盛氣凌敵"],["虛實","以治擊亂","將威","鬼謀"]]]},
+ {name:"[T0.5] 陳熙溫侯弓(陳熙/呂布/許攸)",team:[["陳熙",["草船借箭","先登死士"],["始計","三軍之眾","錘煉",""]],["呂布",["當鋒摧決","摧鋒斷刃"],["用間","出奇制勝","精准",""]],["許攸",["臨危救主","精・魚鱗陣"],["始計","枕戈坐甲","錘煉",""]]]},
+ {name:"[T0.5] 陸遜吳槍(陸遜/程普/魯肅)",team:[["陸遜",["當鋒摧決","兵無常勢"],["作戰","奇正相生","文韜","執銳"]],["程普",["草船借箭","撫輯軍民"],["軍形","無戰而勝","守勢","防備"]],["魯肅",["暫避其鋒","鋒矢陣"],["軍形","惜兵愛民","防備","守勢"]]]},
+ {name:"[T0.5] 飛熊五謀(SP荀彧/SP郭嘉/賈詡)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["軍形","惜兵愛民","守勢","防備"]],["SP郭嘉",["奪魂挾魄","折衝禦侮"],["作戰","奇正相生","文韜","執銳"]],["賈詡",["偽書相間","飛熊軍"],["九變","示敵以弱","百戰","掩虛"]]]},
+ {name:"[T0.5] 飛熊司馬騎(司馬懿/曹操/滿寵)",team:[["司馬懿",["用武通神","士別三日"],["軍形","惜兵愛民","勇毅","防備"]],["曹操",["鋒矢陣","魅惑"],["九變","臨敵不亂","救主","掩虛"]],["滿寵",["刮骨療毒","飛熊軍"],["九變","援其必攻","勵軍","掩虛"]]]},
+ {name:"[T0.5] 飛熊都督(SP周瑜/陸遜/魯肅)",team:[["SP周瑜",["奪魂挾魄","刮骨療毒"],["軍形","避其銳氣","鐵甲","靜心"]],["陸遜",["當鋒摧決","兵無常勢"],["作戰","奇正相生","文韜","執銳"]],["魯肅",["暫避其鋒","飛熊軍"],["軍形","惜兵愛民","防備","守勢"]]]},
+ {name:"[T0.5] 馬嬋等風熊(姜維/劉備/馬嬋)",team:[["姜維",["上兵伐謀","文武雙全"],["作戰","蠻勇非勇","文韜",""]],["劉備",["飛熊軍","鋒矢陣"],["九變","臨敵不亂","速戰",""]],["馬嬋",["靈機一動","刮骨療毒"],["九變","援其必攻","速戰",""]]]},
+ {name:"[T0.5] 麒麟弓(姜維/龐統/諸葛亮)",team:[["姜維",["奪魂挾魄","杯蛇鬼車"],["作戰","蠻勇非勇","文韜","執銳"]],["龐統",["太平道法","無當飛軍"],["虛實","後發先至","鬼謀","將威"]],["諸葛亮",["八門金鎖陣","嬰城自守"],["九變","援其必攻","勵軍","馳援"]]]},
+ {name:"[T1] 三勢法正(法正/張角/曹操)",team:[["法正",["三勢陣","刮骨療毒"],["九變","援其必攻","百戰","掩虛"]],["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["曹操",["撫輯軍民","草船借箭"],["軍形","嚴陣以待","守勢","防備"]]]},
+ {name:"[T1] 五謀臣(SP荀彧/SP郭嘉/賈詡)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["軍形","惜兵愛民","守勢","防備"]],["SP郭嘉",["奪魂挾魄","當鋒摧決"],["作戰","奇正相生","文韜","執銳"]],["賈詡",["暫避其鋒","偽書相間"],["九變","示敵以弱","百戰","掩虛"]]]},
+ {name:"[T1] 北伐陣(SP諸葛亮/關興/張苞)",team:[["SP諸葛亮",["草船借箭","暫避其鋒"],["九變","援其必攻","勵軍","速戰"]],["關興",["千里走單騎","剛勇無前"],["虛實","後發先至","鬼謀","將威"]],["張苞",["青州兵","箕形陣"],["作戰","不勇則死","勝戰","執銳"]]]},
+ {name:"[T1] 天水弓(姜維/諸葛亮/趙雲)",team:[["姜維",["奪魂挾魄","杯蛇鬼車"],["作戰","蠻勇非勇","文韜","執銳"]],["諸葛亮",["八門金鎖陣","嬰城自守"],["九變","援其必攻","勵軍","馳援"]],["趙雲",["破陣摧堅","萬箭齊發"],["虛實","以治擊亂","神機","鬼謀"]]]},
+ {name:"[T1] 孫太周(孫權/太史慈/周泰)",team:[["孫權",["當鋒摧決","兵無常勢"],["作戰","勝而益強","文韜","執銳"]],["太史慈",["折衝禦侮","速乘其利"],["作戰","勝而益強","武略","執銳"]],["周泰",["草船借箭","撫輯軍民"],["軍形","守而有道","守勢","防備"]]]},
+ {name:"[T1] 張角群盾(張角/蔡文姬/華佗)",team:[["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["蔡文姬",["鋒矢陣","魅惑"],["九變","援其必攻","百戰","掩虛"]],["華佗",["刮骨療毒","威謀靡亢"],["九變","援其必攻","散仙","掩虛"]]]},
+ {name:"[T1] 惇惇盾(曹操/夏侯惇/滿寵)",team:[["曹操",["藤甲兵","草船借箭"],["軍形","嚴陣以待","守勢",""]],["夏侯惇",["氣凌三軍","眾動萬計"],["軍形","三裡而還","鐵甲",""]],["滿寵",["刮骨療毒","非攻制勝"],["九變","援其必攻","勵軍",""]]]},
+ {name:"[T1] 才俊槍(姜維/關銀屏/諸葛亮)",team:[["姜維",["奪魂挾魄","火熾原燎"],["作戰","蠻勇非勇","文韜","執銳"]],["關銀屏",["據水斷橋","青州兵"],["虛實","以治擊亂","神機",""]],["諸葛亮",["暫避其鋒","刮骨療毒"],["九變","援其必攻","救主","掩虛"]]]},
+ {name:"[T1] 楊琪五謀臣(楊琪/賈詡/荀攸)",team:[["楊琪",["知己知彼","勠力同心"],["始計","三軍之眾","錘煉",""]],["賈詡",["靈機一動","焚輜營壘"],["始計","三軍之眾","錘煉",""]],["荀攸",["奪魂挾魄","上兵伐謀"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T1] 武鋒陣(程普/黃忠/左慈)",team:[["程普",["撫輯軍民","草船借箭"],["軍形","無戰而勝","守勢","防備"]],["黃忠",["擊其惰歸","剛勇無前"],["虛實","疾戰突圍","鬼謀","將威"]],["左慈",["武鋒陣","陷陣營"],["九變","援其必攻","散仙","掩虛"]]]},
+ {name:"[T1] 洞察槍(趙雲/關銀屏/魏延)",team:[["趙雲",["草船借箭","威謀靡亢"],["九變","援其必攻","勵軍","掩虛"]],["關銀屏",["據水斷橋","青州兵"],["虛實","以治擊亂","神機",""]],["魏延",["破陣摧堅","絕其汲道"],["虛實","以治擊亂","神機","鬼謀"]]]},
+ {name:"[T1] 溫侯弓(左慈/呂布/許攸)",team:[["左慈",["武鋒陣","錦帆軍"],["九變","援其必攻","散仙","勵軍"]],["呂布",["暴戾無仁","速乘其利"],["作戰","一鼓作氣","勝戰","執銳"]],["許攸",["非攻制勝","當鋒摧決"],["作戰","奇正相生","文韜","藏刀"]]]},
+ {name:"[T1] 漢中盾(姜維/魏延/劉備)",team:[["姜維",["奪魂挾魄","當鋒摧決"],["作戰","奇正相生","文韜","執銳"]],["魏延",["威謀靡亢","絕其汲道"],["虛實","以治擊亂","神機","鬼謀"]],["劉備",["陷陣營","暫避其鋒"],["九變","援其必攻","掩虛","勵軍"]]]},
+ {name:"[T1] 父女槍(SP諸葛亮/關羽/關銀屏)",team:[["SP諸葛亮",["草船借箭","威謀靡亢"],["九變","援其必攻","勵軍","掩虛"]],["關羽",["千里走單騎","絕其汲道"],["虛實","後發先至","鬼謀","將威"]],["關銀屏",["據水斷橋","青州兵"],["虛實","以治擊亂","神機",""]]]},
+ {name:"[T1] 社稷弓(SP周瑜/陸遜/程普)",team:[["SP周瑜",["刮骨療毒","士別三日"],["軍形","避其銳氣","鐵甲","靜心"]],["陸遜",["當鋒摧決","兵無常勢"],["作戰","奇正相生","文韜","執銳"]],["程普",["草船借箭","撫輯軍民"],["軍形","無戰而勝","守勢","防備"]]]},
+ {name:"[T1] 神火盾(孫堅/周泰/魯肅)",team:[["孫堅",["剛勇無前","擊其惰歸"],["軍形","無戰而勝","鐵甲","防備"]],["周泰",["草船借箭","撫輯軍民"],["軍形","守而有道","守勢","防備"]],["魯肅",["暫避其鋒","鋒矢陣"],["軍形","惜兵愛民","守勢","防備"]]]},
+ {name:"[T1] 肉弓(陸遜/太史慈/程普)",team:[["陸遜",["奪魂挾魄","刮骨療毒"],["作戰","奇正相生","文韜","執銳"]],["太史慈",["當鋒摧決","兵無常勢"],["作戰","勝而益強","武略","執銳"]],["程普",["草船借箭","撫輯軍民"],["軍形","無戰而勝","守勢","防備"]]]},
+ {name:"[T1] 虎臣騎(太史慈/凌統/周泰)",team:[["太史慈",["當鋒摧決","百騎劫營"],["作戰","一鼓作氣","勝戰","執銳"]],["凌統",["破軍威勝","橫掃千軍"],["虛實","以治擊亂","鬼謀","將威"]],["周泰",["西涼鐵騎","盛氣凌敵"],["軍形","守而有道","防備","守勢"]]]},
+ {name:"[T1] 關關魏(關羽/關銀屏/魏延)",team:[["關羽",["威謀靡亢","箕形陣"],["虛實","後發先至","鬼謀","合變"]],["關銀屏",["據水斷橋","青州兵"],["虛實","以治擊亂","神機",""]],["魏延",["威謀靡亢","絕其汲道"],["虛實","以治擊亂","神機","鬼謀"]]]},
+ {name:"[T1] 魏法弓(曹操/賈詡/荀攸)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","勵軍","掩虛"]],["賈詡",["奪魂挾魄","刮骨療毒"],["九變","示敵以弱","百戰","掩虛"]],["荀攸",["太平道法","士別三日"],["虛實","攻其不備","將威","鬼謀"]]]},
+ {name:"[T1] 魏法騎(曹操/賈詡/程昱)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","勵軍","掩虛"]],["賈詡",["奪魂挾魄","刮骨療毒"],["九變","示敵以弱","百戰","掩虛"]],["程昱",["太平道法","士別三日"],["虛實","攻其不備","將威","鬼謀"]]]},
+ {name:"[T1.5] 仙人盾(董卓/兀突骨/田豐)",team:[["董卓",["絕地反擊","乘勝長驅"],["軍形","無戰而勝","鐵甲","守勢"]],["兀突骨",["草船借箭","御敵屏障"],["軍形","守而有道","防備","守勢"]],["田豐",["暫避其鋒","刮骨療毒"],["九變","示敵以弱","百戰","掩虛"]]]},
+ {name:"[T1.5] 司馬盾(司馬懿/曹操/郝昭)",team:[["司馬懿",["用武通神","士別三日"],["軍形","惜兵愛民","勇毅","防備"]],["曹操",["魅惑","藤甲兵"],["九變","臨敵不亂","救主","掩虛"]],["郝昭",["鋒矢陣","刮骨療毒"],["九變","援其必攻","勵軍","掩虛"]]]},
+ {name:"[T1.5] 孫權吳槍(孫權/程普/魯肅)",team:[["孫權",["當鋒摧決","兵無常勢"],["作戰","勝而益強","文韜","執銳"]],["程普",["草船借箭","撫輯軍民"],["軍形","無戰而勝","守勢","防備"]],["魯肅",["暫避其鋒","鋒矢陣"],["軍形","惜兵愛民","防備","守勢"]]]},
+ {name:"[T1.5] 孫權天王弓(孫權/陸遜/程普)",team:[["孫權",["當鋒摧決","兵無常勢"],["作戰","勝而益強","文韜","執銳"]],["陸遜",["無當飛軍","刮骨療毒"],["作戰","奇正相生","文韜","執銳"]],["程普",["草船借箭","撫輯軍民"],["軍形","無戰而勝","守勢","防備"]]]},
+ {name:"[T1.5] 形一太尉(司馬懿/曹操/滿寵)",team:[["司馬懿",["用武通神","士別三日"],["軍形","惜兵愛民","勇毅","防備"]],["曹操",["魅惑","撫輯軍民"],["九變","臨敵不亂","救主","掩虛"]],["滿寵",["形一陣","刮骨療毒"],["九變","援其必攻","勵軍","掩虛"]]]},
+ {name:"[T1.5] 核彈張遼(張遼/曹操/郭嘉)",team:[["張遼",["當鋒摧決","暴戾無仁"],["作戰","一鼓作氣","勝戰","藏刀"]],["曹操",["鐵騎驅馳","虎豹騎"],["軍形","嚴陣以待","守勢","防備"]],["郭嘉",["鋒矢陣","折衝禦侮"],["作戰","奇正相生","文韜","藏刀"]]]},
+ {name:"[T1.5] 甘太程(甘寧/太史慈/程普)",team:[["甘寧",["萬箭齊發","避實擊虛"],["虛實","以治擊亂","鬼謀","將威"]],["太史慈",["折衝禦侮","當鋒摧決"],["作戰","勝而益強","武略","執銳"]],["程普",["無當飛軍","八門金鎖陣"],["軍形","無戰而勝","防備","守勢"]]]},
+ {name:"[T1.5] 趙雲武鋒(趙雲/張角/左慈)",team:[["趙雲",["威謀靡亢","草船借箭"],["九變","援其必攻","勵軍","掩虛"]],["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["左慈",["武鋒陣","刮骨療毒"],["九變","援其必攻","散仙","掩虛"]]]},
+];
+
+/* =====================================================
+   水墨頭像:宣紙底 + 潑墨筆刷 + 名末字書法 + 朱印
+   (風格化生成圖,非官方美術)
+===================================================== */
+const FX_COLOR={魏:"#4a8df0",蜀:"#3fbf74",吳:"#f05252",群:"#e8a23a"};
+function seedRand(str){let h=2166136261;for(const c of str){h^=c.codePointAt(0);h=Math.imul(h,16777619);}
+  return ()=>{h=Math.imul(h^h>>>15,2246822507);h=Math.imul(h^h>>>13,3266489909);return ((h^=h>>>16)>>>0)/4294967296;};}
+function drawInk(cv,g){
+  const S=144; cv.width=S; cv.height=S;
+  const x=cv.getContext("2d"); const rnd=seedRand(g.n+g.f);
+  // 宣紙底(微雜訊)
+  x.fillStyle="#e9e2cf"; x.fillRect(0,0,S,S);
+  for(let i=0;i<260;i++){x.fillStyle=`rgba(120,105,80,${.03+rnd()*.05})`;
+    x.fillRect(rnd()*S,rnd()*S,1.5,1.5);}
+  // 大潑墨筆刷(斜向,多層橢圓疊出乾筆感)
+  const ang=(-.5+rnd()*.35), cx=S*.5+(rnd()*20-10), cy=S*.52+(rnd()*16-8);
+  x.save(); x.translate(cx,cy); x.rotate(ang);
+  for(let i=0;i<9;i++){
+    const w=S*.62*(1-i*.06), h=S*.30*(1-i*.05);
+    x.fillStyle=`rgba(20,18,16,${.14+i*.04})`;
+    x.beginPath(); x.ellipse((rnd()*10-5),(rnd()*8-4),w/2,h/2,rnd()*.3-.15,0,7); x.fill();
+  }
+  // 飛白(乾筆刮痕)
+  x.globalCompositeOperation="destination-out";
+  for(let i=0;i<7;i++){x.fillStyle="rgba(0,0,0,.5)";
+    x.fillRect(-S*.35+rnd()*S*.7,-S*.16+rnd()*S*.3,S*.5*rnd(),1.4+rnd()*1.6);}
+  x.globalCompositeOperation="source-over";
+  x.restore();
+  // 墨點飛濺
+  for(let i=0;i<12;i++){const r=.8+rnd()*3.2;
+    x.fillStyle=`rgba(22,20,18,${.25+rnd()*.5})`;
+    x.beginPath(); x.arc(rnd()*S,rnd()*S,r,0,7); x.fill();}
+  // 陣營色刀鋒斜線(一抹色彩,火鳳式的血色/軍旗感)
+  x.save(); x.translate(S*.5,S*.5); x.rotate(ang-.9);
+  const grad=x.createLinearGradient(-S/2,0,S/2,0);
+  grad.addColorStop(0,"transparent"); grad.addColorStop(.5,FX_COLOR[g.f]+"cc"); grad.addColorStop(1,"transparent");
+  x.fillStyle=grad; x.fillRect(-S/2,-2.5,S,5); x.restore();
+  // 名末字(狂草感:主字 + 偏移殘影)
+  const ch=g.n[g.n.length-1];
+  const fy=S*.56+(rnd()*8-4), rot=(rnd()*.22-.11);
+  x.save(); x.translate(S*.5,fy); x.rotate(rot);
+  x.font=`900 ${Math.round(S*.52)}px "Noto Serif TC","DFKai-SB","BiauKai",serif`;
+  x.textAlign="center"; x.textBaseline="middle";
+  x.fillStyle="rgba(233,226,207,.35)"; x.fillText(ch,3,3);       // 殘影
+  x.fillStyle="#141210"; x.fillText(ch,0,0);                      // 主字
+  x.strokeStyle="rgba(233,226,207,.5)"; x.lineWidth=1; x.strokeText(ch,0,0); // 飛白描邊
+  x.restore();
+  // 朱印(右上,篆印感:陣營字)
+  const px=S-30, py=12;
+  x.fillStyle="#c22a1a"; x.fillRect(px,py,20,20);
+  x.fillStyle="rgba(233,226,207,.95)";
+  x.font=`700 13px "Noto Serif TC",serif`; x.textAlign="center"; x.textBaseline="middle";
+  x.fillText(g.f,px+10,py+11);
+  // 邊框裂痕
+  x.strokeStyle="rgba(20,18,16,.55)"; x.lineWidth=2; x.strokeRect(1,1,S-2,S-2);
+}
+function avatarEl(g,size){
+  if(g.img){const im=document.createElement("img");im.src=g.img;im.alt=g.n;
+    im.style.width=im.style.height=size+"px";return im;}
+  const cv=document.createElement("canvas");drawInk(cv,g);
+  cv.style.width=cv.style.height=size+"px";return cv;}
+
+/* =====================================================
+   儲存:隊伍 / 覆寫 / 卡池 / API Key
+===================================================== */
+const SAVE_KEY="sgz_lineup_v1", OVR_KEY="sgz_overrides_v1",
+      OWN_KEY="sgz_owned_v1", KEY_KEY="sgz_api_key";
+const findGen=n=>GENERALS.find(g=>g.n===n)||null;
+const findTac=n=>TACTICS.find(t=>t.name===n)||TACTICS[0];
+let myTeam=[null,null,null], foeTeam=[null,null,null];
+let owned=new Set(); let pickTarget=null;
+
+function applyOverrides(){
+  try{
+    const o=JSON.parse(localStorage.getItem(OVR_KEY)||"{}");
+    for(const g of GENERALS){const d=o[g.n]; if(!d)continue;
+      for(const k of["wu","zhi","tong","su","c"])if(d[k]!=null)g[k]=+d[k];
+      if(d.rate!=null)g.tac.rate=+d.rate;
+      if(d.img!=null)g.img=d.img||undefined;}
+  }catch(e){}
+}
+function saveOverride(n,data){
+  const o=JSON.parse(localStorage.getItem(OVR_KEY)||"{}");
+  if(data)o[n]=data; else delete o[n];
+  localStorage.setItem(OVR_KEY,JSON.stringify(o));
+}
+function save(){
+  const pack=t=>t.map(s=>s?{n:s.gen.n,tacs:s.tacs,bk:s.bk||{sys:"",big:"",smalls:["",""]},red:s.red||{star:0,add:{wu:0,zhi:0,tong:0,su:0}}}:null);
+  localStorage.setItem(SAVE_KEY,JSON.stringify({my:pack(myTeam),foe:pack(foeTeam),
+    cap:document.getElementById("costCap").value}));
+  localStorage.setItem(OWN_KEY,JSON.stringify([...owned]));
+}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
+    if(d){
+      const un=a=>(a||[]).map(s=>s&&findGen(s.n)?{gen:findGen(s.n),tacs:s.tacs||["—(不攜帶)","—(不攜帶)"],bk:s.bk||{sys:"",big:"",smalls:["",""]},red:s.red||{star:0,add:{wu:0,zhi:0,tong:0,su:0}}}:null);
+      myTeam=un(d.my); foeTeam=un(d.foe);
+      while(myTeam.length<3)myTeam.push(null); while(foeTeam.length<3)foeTeam.push(null);
+      if(d.cap)document.getElementById("costCap").value=d.cap;
+    }
+    owned=new Set(JSON.parse(localStorage.getItem(OWN_KEY)||"[]"));
+    document.getElementById("apiKey").value=localStorage.getItem(KEY_KEY)||"";
+    document.getElementById("geminiKey").value=localStorage.getItem("sgz_gemini_key")||"";
+    const prov=localStorage.getItem("sgz_ai_provider"); if(prov)document.getElementById("aiProvider").value=prov;
+  }catch(e){}
+}
+
+/* =====================================================
+   UI:隊伍格
+===================================================== */
+const ROLES=["主將","中軍","前鋒"];
+function renderTeam(side){
+  const team=side==="my"?myTeam:foeTeam;
+  const wrap=document.getElementById(side==="my"?"mySlots":"foeSlots");
+  wrap.innerHTML="";
+  team.forEach((slot,i)=>{
+    const d=document.createElement("div"); d.className="slot panel";
+    d.innerHTML=`<span class="role">${ROLES[i]}</span>`;
+    if(!slot){
+      const b=document.createElement("button"); b.className="empty-btn"; b.textContent="＋ 選擇武將";
+      b.onclick=()=>openPicker(side,i); d.appendChild(b);
+    }else{
+      const g=slot.gen;
+      const row=document.createElement("div"); row.className="genrow";
+      row.appendChild(avatarEl(g,72));
+      const info=document.createElement("div"); info.className="geninfo";
+      info.innerHTML=`<span class="nm">${g.n}</span><span class="fx ${g.f}">${g.f}</span>
+        <div class="st num-line">★${g.s} 統御<span class="num">${g.c}</span>｜武<span class="num">${g.wu}</span> 智<span class="num">${g.zhi}</span> 統<span class="num">${g.tong}</span> 速<span class="num">${g.su}</span><br>
+        <span class="apt">騎${ap(g,"騎")} 槍${ap(g,"槍")} 弓${ap(g,"弓")} 盾${ap(g,"盾")} 器${ap(g,"器")}</span></div>
+        <div class="builtin" title="${(g.desc||"").replace(/"/g,"&quot;")}">自帶:${g.tac.name} <small>(${g.tac.type})</small></div>`;
+      row.appendChild(info); d.appendChild(row);
+      const tacs=document.createElement("div"); tacs.className="tacs";
+      slot.tacs.forEach((tn,ti)=>{
+        const sel=document.createElement("select");
+        TACTICS.forEach(t=>{const o=document.createElement("option");o.value=t.name;
+          o.textContent=t.name===TACTICS[0].name?t.name:`${t.name}(${t.type})`;
+          if(t.name===tn)o.selected=true; sel.appendChild(o);});
+        sel.onchange=()=>{slot.tacs[ti]=sel.value; save();};
+        tacs.appendChild(sel);
+      });
+      d.appendChild(tacs);
+      // 兵書:三段階層(系 → 大兵書 → 小兵書×2)
+      if(!slot.bk)slot.bk={sys:"",big:"",smalls:["",""]};
+      const bwrap=document.createElement("div"); bwrap.className="bk";
+      // 系
+      const rowSys=document.createElement("div"); rowSys.className="bkrow";
+      rowSys.insertAdjacentHTML("beforeend",'<span class="blab">兵書系</span>');
+      const selSys=document.createElement("select");
+      const os0=document.createElement("option");os0.value="";os0.textContent="—";selSys.appendChild(os0);
+      SYS_ORDER.forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;
+        if(s===slot.bk.sys)o.selected=true;selSys.appendChild(o);});
+      selSys.onchange=()=>{slot.bk.sys=selSys.value;slot.bk.big="";slot.bk.smalls=["",""];save();renderTeam(side);};
+      rowSys.appendChild(selSys); bwrap.appendChild(rowSys);
+      if(slot.bk.sys){
+        const bigs=Object.keys(BOOKS).filter(b=>BOOKS[b].sys===slot.bk.sys&&BOOKS[b].tier==="big");
+        const smls=Object.keys(BOOKS).filter(b=>BOOKS[b].sys===slot.bk.sys&&BOOKS[b].tier==="small");
+        // 大兵書
+        const rowBig=document.createElement("div"); rowBig.className="bkrow";
+        rowBig.insertAdjacentHTML("beforeend",'<span class="blab">大兵書</span>');
+        const selBig=document.createElement("select");
+        const ob0=document.createElement("option");ob0.value="";ob0.textContent="—";selBig.appendChild(ob0);
+        bigs.forEach(b=>{const o=document.createElement("option");o.value=b;o.textContent=b;
+          if(b===slot.bk.big)o.selected=true;selBig.appendChild(o);});
+        selBig.onchange=()=>{slot.bk.big=selBig.value;save();};
+        rowBig.appendChild(selBig); bwrap.appendChild(rowBig);
+        // 小兵書×2(防重複)
+        const rowSm=document.createElement("div"); rowSm.className="bkrow";
+        rowSm.insertAdjacentHTML("beforeend",'<span class="blab">小兵書</span>');
+        [0,1].forEach(si=>{
+          const sel=document.createElement("select");
+          const o0=document.createElement("option");o0.value="";o0.textContent="—";sel.appendChild(o0);
+          smls.forEach(b=>{
+            if(slot.bk.smalls.includes(b)&&slot.bk.smalls[si]!==b)return;
+            const o=document.createElement("option");o.value=b;o.textContent=b;
+            if(b===slot.bk.smalls[si])o.selected=true;sel.appendChild(o);});
+          sel.onchange=()=>{slot.bk.smalls[si]=sel.value;save();renderTeam(side);};
+          rowSm.appendChild(sel);
+        });
+        bwrap.appendChild(rowSm);
+      }
+      d.appendChild(bwrap);
+      // 紅度 + 自由加點
+      if(!slot.red)slot.red={star:0,add:{wu:0,zhi:0,tong:0,su:0}};
+      const rrow=document.createElement("div"); rrow.className="redrow";
+      rrow.insertAdjacentHTML("beforeend",'<span class="blab">紅度</span>');
+      const selR=document.createElement("select");
+      for(let s=0;s<=5;s++){const o=document.createElement("option");o.value=s;
+        o.textContent="+"+s+"紅"; if(s===slot.red.star)o.selected=true; selR.appendChild(o);}
+      selR.onchange=()=>{slot.red.star=+selR.value;
+        const cap=slot.red.star*10;const a=slot.red.add;
+        let sum=a.wu+a.zhi+a.tong+a.su; if(sum>cap){a.wu=a.zhi=a.tong=a.su=0;}
+        save();renderTeam(side);};
+      rrow.appendChild(selR);
+      const cap=slot.red.star*10;
+      const used=slot.red.add.wu+slot.red.add.zhi+slot.red.add.tong+slot.red.add.su;
+      rrow.insertAdjacentHTML("beforeend",`<span class="rcap num">剩 ${cap-used}/${cap}</span>`);
+      d.appendChild(rrow);
+      if(slot.red.star>0){
+        const arow=document.createElement("div"); arow.className="addrow";
+        [["wu","武"],["zhi","智"],["tong","統"],["su","速"]].forEach(([k,lab])=>{
+          const box=document.createElement("span"); box.className="addbox";
+          box.insertAdjacentHTML("beforeend",`<label>${lab}</label>`);
+          const inp=document.createElement("input");inp.type="number";inp.min=0;inp.value=slot.red.add[k];
+          inp.onchange=()=>{
+            let v=Math.max(0,parseInt(inp.value)||0);
+            const others=used-slot.red.add[k];
+            if(v+others>cap)v=Math.max(0,cap-others);
+            slot.red.add[k]=v; save(); renderTeam(side);
+          };
+          box.appendChild(inp); arow.appendChild(box);
+        });
+        d.appendChild(arow);
+      }
+      const rm=document.createElement("button"); rm.className="rm"; rm.textContent="移除";
+      rm.onclick=()=>{team[i]=null; renderTeam(side); updateCost(side); save();};
+      d.appendChild(rm);
+    }
+    wrap.appendChild(d);
+  });
+  updateCost(side);
+}
+const ap=(g,k)=>g.apt[k]==="S"?`<b>S</b>`:g.apt[k];
+function updateCost(side){
+  const team=side==="my"?myTeam:foeTeam;
+  const total=team.reduce((a,s)=>a+(s?s.gen.c:0),0);
+  const el=document.getElementById(side==="my"?"myCost":"foeCost");
+  const cap=+document.getElementById("costCap").value;
+  el.querySelector("b").textContent=total;
+  if(side==="my")el.classList.toggle("over",total>cap);
+}
+
+/* 選將視窗 */
+let pickFx="全";
+function openPicker(side,idx){
+  pickTarget={side,idx};
+  document.getElementById("picker").classList.add("on");
+  document.getElementById("pickSearch").value="";
+  renderPickList();
+}
+function renderPickList(){
+  const q=document.getElementById("pickSearch").value.trim();
+  const list=document.getElementById("pickList"); list.innerHTML="";
+  const team=pickTarget.side==="my"?myTeam:foeTeam;
+  const usedHere=new Set(team.filter(Boolean).map(s=>s.gen.n));
+  GENERALS.filter(g=>(pickFx==="全"||g.f===pickFx)&&(!q||g.n.includes(q)))
+   .forEach(g=>{
+    const c=document.createElement("div"); c.className="gencard";
+    if(usedHere.has(g.n))c.style.opacity=.35;
+    c.appendChild(avatarEl(g,52));
+    c.insertAdjacentHTML("beforeend",`<div><div class="nm">${g.n} <span class="fx ${g.f}">${g.f}</span></div>
+      <div class="sub">★${g.s} 統御${g.c}｜${g.tac.name}<br>武${g.wu} 智${g.zhi} 統${g.tong} 速${g.su}</div></div>`);
+    c.onclick=()=>{
+      if(usedHere.has(g.n))return;
+      team[pickTarget.idx]={gen:g,tacs:["—(不攜帶)","—(不攜帶)"],bk:{sys:"",big:"",smalls:["",""]},red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}}};
+      document.getElementById("picker").classList.remove("on");
+      renderTeam(pickTarget.side); save();
+    };
+    list.appendChild(c);
+   });
+}
+
+/* =====================================================
+   模擬引擎(簡化趨勢模型,同 v1 驗證版)
+===================================================== */
+const APT_MULT={S:1.15,A:1.0,B:.85,C:.7};
+function bestApt(g){let best="C";for(const k of["騎","槍","弓","盾","器"]){
+  if(APT_MULT[g.apt[k]]>APT_MULT[best])best=g.apt[k];}return APT_MULT[best];}
+function makeUnit(slot,team,pos){
+  const g=slot.gen;
+  // 紅度加點(疊到有效四維)
+  const ra=(slot.red&&slot.red.add)||{wu:0,zhi:0,tong:0,su:0};
+  const eg={n:g.n,f:g.f,s:g.s,c:g.c,apt:g.apt,tac:g.tac,
+    wu:g.wu+(ra.wu||0),zhi:g.zhi+(ra.zhi||0),tong:g.tong+(ra.tong||0),su:g.su+(ra.su||0)};
+  const tacs=[g.tac,...slot.tacs.map(findTac).filter(t=>t.kind!=="none")];
+  let dmgReduce=tacs.filter(t=>t.kind==="guard").reduce((a,t)=>a+t.pow,0);
+  const counters=tacs.filter(t=>t.kind==="counter");
+  // 六系兵書:大兵書1 + 小兵書2
+  let bd=0,bh=0,br=0,bDot=0,bDotDef=0,bHeal=0,bTong=0,bCounter=0;
+  const bkList=[];
+  if(slot.bk){ if(slot.bk.big)bkList.push(slot.bk.big);
+    for(const s of (slot.bk.smalls||[]))if(s)bkList.push(s); }
+  else if(slot.books){ for(const b of slot.books)if(b)bkList.push(b); } // 舊格式相容
+  for(const bn of bkList){
+    const b=BOOKS[bn]; if(!b)continue;
+    bd+=b.d||0; dmgReduce+=b.g||0; bh+=b.h||0; br+=b.r||0;
+    bDot+=b.dot||0; bDotDef+=b.dotdef||0; bHeal+=b.heal||0;
+    bTong+=b.tong||0; bCounter+=b.counter||0;
+  }
+  if(bTong)eg.tong+=bTong; // 統軍等
+  dmgReduce=Math.min(.5,dmgReduce);
+  const vulnFire=tacs.some(t=>/藤甲/.test(t.name)||t.kind==="tengjia");
+  const tengjiaSelf=tacs.some(t=>t.kind==="tengjia")?0.25:0;
+  const u={g:eg,team,pos,troops:10000,tacs,dmgReduce,counters,vulnFire,
+    tengjia:tengjiaSelf,
+    buffAtk:bd,shield:0,ctrlTurns:0,dot:0,dead:false,
+    bookRegen:bh,rateBn:br,dotBn:bDot,dotDef:bDotDef,healBn:bHeal};
+  if(bCounter>0)u.counters=[...counters,{kind:"counter",pow:bCounter*0.7,rate:0.5}];
+  return u;
+}
+function attackDamage(atkStat,def,aptMul,troopRatio,pow=1){
+  const base=(atkStat*2.6-Math.max(def,110)*1.3)*aptMul;
+  return Math.max(300*pow,base*pow*(0.6+0.8*troopRatio))*(0.92+Math.random()*0.16);
+}
+function pickTargets(units,me,n){
+  const foes=units.filter(u=>!u.dead&&u.team!==me.team);
+  if(!foes.length)return [];
+  return [...foes].sort(()=>Math.random()-.5).slice(0,Math.min(n,foes.length));
+}
+function applyDamage(t,dmg,isFire=false){
+  if(isFire&&t.vulnFire){
+    dmg*=1.6;                               // 藤甲怕火:穿透藤甲減傷並放大
+    if(t.dmgReduce)dmg*=(1-t.dmgReduce);    // 兵書/守護類減傷仍有效
+  }else{
+    const red=Math.min(.6,(t.dmgReduce||0)+(t.tengjia||0));
+    if(red)dmg*=(1-red);
+  }
+  if(t.shield>0){const ab=Math.min(t.shield,dmg);t.shield-=ab;dmg-=ab;}
+  t.troops=Math.max(0,t.troops-dmg);
+  if(t.troops<=0)t.dead=true;
+}
+const sum=(units,team)=>units.filter(u=>u.team===team).reduce((a,u)=>a+u.troops,0);
+const allies=(units,u)=>units.filter(x=>!x.dead&&x.team===u.team);
+const enemies=(units,u)=>units.filter(x=>!x.dead&&x.team!==u.team);
+function simulateOnce(myT,foeT){
+  const units=[];
+  myT.forEach((s,i)=>s&&units.push(makeUnit(s,"me",i)));
+  foeT.forEach((s,i)=>s&&units.push(makeUnit(s,"foe",i)));
+  const curve=[[sum(units,"me"),sum(units,"foe")]];
+  for(const u of units)for(const t of u.tacs){
+    if(t.type==="指揮"||t.type==="被動"||t.type==="陣法"||t.type==="兵種"){
+      if(t.kind==="shield")((t.aoe||1)>1?allies(units,u):[u]).forEach(a=>a.shield+=a.troops*t.pow);
+      if(t.kind==="tengjia")allies(units,u).forEach(a=>{a.tengjia=Math.max(a.tengjia||0,t.pow);a.vulnFire=true;});
+      if(t.kind==="buff")  ((t.aoe||0)>1?allies(units,u):[u]).forEach(a=>a.buffAtk+=t.pow);
+      if(t.kind==="debuff")enemies(units,u).forEach(e=>e.buffAtk-=t.pow*(u.g.zhi/220));
+    }
+  }
+  for(let r=1;r<=8;r++){
+    const order=units.filter(u=>!u.dead).sort((a,b)=>b.g.su-a.g.su);
+    for(const u of order){
+      if(u.dead)continue;
+      if(u.dot>0){applyDamage(u,u.dot,!!u.dotFire); if(u.dead)continue;}
+      if(u.ctrlTurns>0){u.ctrlTurns--; continue;}
+      const aptMul=bestApt(u.g), tr=u.troops/10000;
+      const tg=pickTargets(units,u,1)[0];
+      if(tg){
+        applyDamage(tg,attackDamage(u.g.wu*(1+u.buffAtk),tg.g.tong,aptMul,tr,1));
+        if(!tg.dead)for(const ct of tg.counters){
+          applyDamage(u,attackDamage(tg.g.wu*(1+tg.buffAtk),u.g.tong,bestApt(tg.g),tg.troops/10000,ct.pow));
+          if(u.dead)break;
+        }
+        if(u.dead)continue;
+      }
+      for(const t of u.tacs){
+        if(t.type==="指揮"||t.type==="被動"||t.type==="陣法"||t.type==="兵種")continue;
+        if(Math.random()>t.rate+(u.rateBn||0))continue;
+        const stat=t.stat==="zhi"?u.g.zhi:u.g.wu;
+        const isFire=/火|焰|熾|燒|焚|燎/.test(t.name)||t.name==="苦肉計";
+        if(t.kind==="dmg"||t.kind==="drain"||t.kind==="dot"||t.kind==="ctrl"){
+          const tgs=pickTargets(units,u,t.aoe||1);
+          for(const e of tgs){
+            if(t.pow>0){
+              const d=attackDamage(stat*(1+u.buffAtk),e.g.tong,aptMul,tr,t.pow);
+              applyDamage(e,d,isFire);
+              if(t.kind==="drain")u.troops=Math.min(10000,u.troops+d*.25);
+              if(t.kind==="dot"){e.dot+=d*.35*(1+(u.dotBn||0))*(1-(e.dotDef||0)); if(isFire)e.dotFire=true;}
+            }
+            if(t.ctrl&&Math.random()<t.ctrl)e.ctrlTurns=Math.max(e.ctrlTurns,1);
+          }
+        }else if(t.kind==="heal"){
+          const low=allies(units,u).sort((a,b)=>a.troops-b.troops).slice(0,t.aoe||1);
+          low.forEach(a=>a.troops=Math.min(10000,a.troops+stat*(4.5*t.pow)*(1+(a.healBn||0))*(0.9+Math.random()*.2)));
+        }
+      }
+      let regen=(u.bookRegen||0);
+      for(const t of u.tacs)if(t.kind==="regen")regen+=t.pow;
+      if(regen>0)u.troops=Math.min(10000,u.troops+10000*regen);
+    }
+    curve.push([sum(units,"me"),sum(units,"foe")]);
+    if(!units.some(u=>!u.dead&&u.team==="me")||!units.some(u=>!u.dead&&u.team==="foe"))
+      {while(curve.length<9)curve.push([sum(units,"me"),sum(units,"foe")]); break;}
+  }
+  const me=sum(units,"me"), foe=sum(units,"foe");
+  return {curve, win: me>foe?1:(me<foe?-1:0)};
+}
+function runSim(){
+  const msg=document.getElementById("simMsg");
+  if(!myTeam.some(Boolean)||!foeTeam.some(Boolean)){msg.textContent="⚠ 我方與敵方都至少要有一名武將";return;}
+  msg.textContent="";
+  const N=+document.getElementById("simN").value;
+  const btn=document.getElementById("fightBtn"); btn.disabled=true;
+  setTimeout(()=>{
+    const acc=Array.from({length:9},()=>[0,0]); let w=0,l=0,d=0;
+    for(let i=0;i<N;i++){
+      const r=simulateOnce(myTeam,foeTeam);
+      r.curve.forEach((p,ri)=>{acc[ri][0]+=p[0];acc[ri][1]+=p[1];});
+      if(r.win>0)w++;else if(r.win<0)l++;else d++;
+    }
+    showResult(acc.map(p=>[p[0]/N,p[1]/N]),w,l,d,N);
+    btn.disabled=false;
+  },30);
+}
+function showResult(avg,w,l,d,N){
+  document.getElementById("result").classList.add("on");
+  document.getElementById("winline").innerHTML=
+    `模擬 <span class="num">${N}</span> 場 → 我方勝 <b class="me num">${(w/N*100).toFixed(1)}%</b> ｜ 敵方勝 <b class="foe num">${(l/N*100).toFixed(1)}%</b> ｜ 平手 <span class="num">${(d/N*100).toFixed(1)}%</span>`;
+  drawChart(avg);
+  const log=avg.map((p,i)=>{
+    const diff=p[0]-p[1];
+    const bar=diff>=0?"▲".repeat(Math.min(12,Math.round(diff/600)))
+                     :"▼".repeat(Math.min(12,Math.round(-diff/600)));
+    return `回合${i}  我${Math.round(p[0]).toString().padStart(5)}  敵${Math.round(p[1]).toString().padStart(5)}  差${diff>=0?"+":""}${Math.round(diff)} ${bar}`;
+  }).join("\n");
+  document.getElementById("roundlog").textContent=log;
+  document.getElementById("result").scrollIntoView({behavior:"smooth"});
+}
+
+/* 回合優劣曲線:電競風(平滑曲線 + 光暈 + 面積填色) */
+function drawChart(avg){
+  const cv=document.getElementById("chart"), x=cv.getContext("2d");
+  const W=cv.width,H=cv.height, padL=72,padR=24,padT=28,padB=44;
+  const pw=W-padL-padR, ph=H-padT-padB, maxY=30000;
+  x.clearRect(0,0,W,H);
+  x.fillStyle="#080b12"; x.fillRect(0,0,W,H);
+  // 網格
+  x.strokeStyle="#1a2438"; x.lineWidth=1;
+  x.font="12px Rajdhani,monospace"; x.fillStyle="#54627f";
+  for(let g=0;g<=6;g++){const y=padT+ph*g/6;
+    x.beginPath();x.moveTo(padL,y);x.lineTo(W-padR,y);x.stroke();
+    x.fillText(String(Math.round(maxY-maxY*g/6)),10,y+4);}
+  for(let r=0;r<=8;r++){const px=padL+pw*r/8;
+    x.beginPath();x.moveTo(px,padT);x.lineTo(px,H-padB);x.stroke();
+    x.fillText("R"+r,px-8,H-padB+20);}
+  // 優劣差柱(金,半透明,零中線)
+  const zero=padT+ph*.5;
+  for(let r=0;r<avg.length;r++){
+    const diff=avg[r][0]-avg[r][1];
+    const px=padL+pw*r/8, h=diff/30000*ph;
+    x.fillStyle=diff>=0?"rgba(232,179,75,.30)":"rgba(232,179,75,.18)";
+    x.fillRect(px-7,Math.min(zero,zero-h),14,Math.abs(h));
+  }
+  x.strokeStyle="#e8b34b"; x.setLineDash([7,5]); x.lineWidth=1;
+  x.beginPath();x.moveTo(padL,zero);x.lineTo(W-padR,zero);x.stroke();x.setLineDash([]);
+  x.fillStyle="#e8b34b"; x.fillText("優劣中線 0",W-padR-92,zero-8);
+  // 平滑曲線 + 面積 + 光暈
+  const pts=idx=>avg.map((p,r)=>[padL+pw*r/8, padT+ph*(1-p[idx]/maxY)]);
+  const smoothPath=(P)=>{x.beginPath();x.moveTo(P[0][0],P[0][1]);
+    for(let i=1;i<P.length;i++){const [x0,y0]=P[i-1],[x1,y1]=P[i];
+      const mx=(x0+x1)/2; x.bezierCurveTo(mx,y0,mx,y1,x1,y1);}};
+  const drawLine=(idx,color,glow)=>{
+    const P=pts(idx);
+    // 面積
+    smoothPath(P); x.lineTo(P[P.length-1][0],H-padB); x.lineTo(P[0][0],H-padB); x.closePath();
+    const g2=x.createLinearGradient(0,padT,0,H-padB);
+    g2.addColorStop(0,color+"33"); g2.addColorStop(1,color+"00");
+    x.fillStyle=g2; x.fill();
+    // 線 + 光暈
+    x.save(); x.shadowColor=glow; x.shadowBlur=12;
+    smoothPath(P); x.strokeStyle=color; x.lineWidth=2.5; x.stroke(); x.restore();
+    // 節點
+    x.fillStyle=color;
+    P.forEach(([px,py])=>{x.beginPath();x.arc(px,py,3.4,0,7);x.fill();});
+  };
+  drawLine(0,"#4ade80","#4ade80");
+  drawLine(1,"#f87171","#f87171");
+  x.fillStyle="#8494b3"; x.font="12px 'Noto Sans TC'"; x.fillText("兵力(平均)",10,17);
+}
+
+/* =====================================================
+   AI 軍師(Anthropic API)
+   - claude.ai 預覽環境:可不填 Key
+   - 本機 file:// 開啟:填入自己的 Key(僅存 localStorage)
+===================================================== */
+function tacListText(){return TACTICS.slice(1).map(t=>`${t.name}(${t.type})`).join("、");}
+async function callGemini(prompt){
+  const key=document.getElementById("geminiKey").value.trim();
+  localStorage.setItem("sgz_gemini_key",key);
+  if(!key)throw new Error("請先填入 Gemini API Key(aistudio.google.com 可免費申請)");
+  const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+encodeURIComponent(key),{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],
+      generationConfig:{maxOutputTokens:1200,temperature:0.7}})});
+  if(!res.ok){
+    if(res.status===429)throw new Error("Gemini 免費額度暫時用罄(429),稍後再試");
+    throw new Error("Gemini API 回應 "+res.status+"(請確認 Key 是否有效)");
+  }
+  const data=await res.json();
+  const txt=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("\n");
+  if(!txt)throw new Error("Gemini 未回傳內容");
+  return txt;
+}
+async function callAI(prompt){
+  return document.getElementById("aiProvider").value==="gemini"?callGemini(prompt):callClaude(prompt);
+}
+async function callClaude(prompt){
+  const key=document.getElementById("apiKey").value.trim();
+  localStorage.setItem(KEY_KEY,key);
+  const headers={"Content-Type":"application/json"};
+  if(key){headers["x-api-key"]=key;
+    headers["anthropic-version"]="2023-06-01";
+    headers["anthropic-dangerous-direct-browser-access"]="true";}
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers,
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
+      messages:[{role:"user",content:prompt}]})});
+  if(!res.ok)throw new Error("API 回應 "+res.status+"(本機開啟需填入有效 API Key)");
+  const data=await res.json();
+  return (data.content||[]).map(i=>i.type==="text"?i.text:"").filter(Boolean).join("\n");
+}
+function teamText(team){
+  return team.filter(Boolean).map(s=>{
+    const g=s.gen, ex=s.tacs.filter(t=>t!=="—(不攜帶)").join("、")||"無";
+    return `${g.n}(${g.f}/自帶:${g.tac.name}/額外:${ex})`;
+  }).join(";");
+}
+async function aiRun(mode){
+  const msg=document.getElementById("aiMsg"), out=document.getElementById("aiOut");
+  const btns=[document.getElementById("aiSuggest"),document.getElementById("aiReview")];
+  let prompt;
+  if(mode==="suggest"){
+    if(owned.size<3){msg.textContent="⚠ 請至少勾選 3 名武將";return;}
+    prompt=`你是《三國志戰略版》(台港澳服)的資深配將軍師。我擁有的武將:${[...owned].join("、")}。可用的額外戰法池:${tacListText()}。兵書分六大系(始計/虛實/軍形/九變/作戰/用間),每系有大兵書與小兵書,每名武將只能選同一系的 1 個大兵書+2 個小兵書。各系兵書:${SYS_ORDER.map(s=>s+"系[大:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="big").join("/")+";小:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="small").join("/")+"]").join(" ")}。請只從我擁有的武將中,推薦 2-3 套三人隊伍(主將/中軍/前鋒),每套列出:隊名、三名武將與各自建議攜帶的 2 個額外戰法(限戰法池內)、每人的兵書(標明系+大兵書+2小兵書)、兵種建議、配隊理由與弱點。請用繁體中文、純文字條列(不要 Markdown 符號),精簡實用。`;
+  }else{
+    if(!myTeam.some(Boolean)){msg.textContent="⚠ 請先在「配將」頁組好我方隊伍";return;}
+    prompt=`你是《三國志戰略版》(台港澳服)的資深配將軍師。請點評這套三人隊伍:${teamText(myTeam)}。請分析:強度定位、戰法搭配是否合理、兵種選擇、明顯弱點與剋制它的常見隊伍、以及 1-2 個具體改進建議(可從此戰法池挑選:${tacListText()})。繁體中文、純文字條列(不要 Markdown 符號),精簡實用。`;
+  }
+  msg.textContent="軍師思考中…"; btns.forEach(b=>b.disabled=true);
+  out.classList.add("on"); out.textContent="…";
+  try{
+    out.textContent=await callAI(prompt);
+    msg.textContent="";
+  }catch(e){
+    out.textContent="⚠ "+e.message;
+    msg.textContent="";
+  }
+  btns.forEach(b=>b.disabled=false);
+}
+function renderOwnList(){
+  const wrap=document.getElementById("ownList"); wrap.innerHTML="";
+  GENERALS.forEach(g=>{
+    const b=document.createElement("button"); b.className="chip"+(owned.has(g.n)?" on":"");
+    b.textContent=g.n;
+    b.onclick=()=>{owned.has(g.n)?owned.delete(g.n):owned.add(g.n);
+      b.classList.toggle("on"); save();};
+    wrap.appendChild(b);
+  });
+}
+
+/* =====================================================
+   圖鑑 + 編輯器
+===================================================== */
+let dexFx="全", editing=null;
+function renderDex(){
+  const grid=document.getElementById("dexGrid"); grid.innerHTML="";
+  GENERALS.filter(g=>dexFx==="全"||g.f===dexFx).forEach(g=>{
+    const c=document.createElement("div"); c.className="gencard";
+    c.appendChild(avatarEl(g,52));
+    c.insertAdjacentHTML("beforeend",`<div><div class="nm">${g.n} <span class="fx ${g.f}">${g.f}</span></div>
+      <div class="sub">★${g.s} 統御${g.c}｜武${g.wu} 智${g.zhi} 統${g.tong} 速${g.su}<br>
+      ${g.tac.name}(${g.tac.type}${g.tac.rate>0&&g.tac.rate<1?"/"+Math.round(g.tac.rate*100)+"%":""})${g.inh?"｜拆解:"+g.inh:""}<br>
+      <span style="color:#6b7a99">${(g.desc||"").slice(0,44)}${(g.desc||"").length>44?"…":""}</span></div></div>`);
+    c.title=(g.desc||"")+(g.inh?"\n傳承戰法:"+g.inh:"");
+    c.onclick=()=>openEditor(g);
+    grid.appendChild(c);
+  });
+}
+function openEditor(g){
+  editing=g;
+  document.getElementById("edTitle").textContent=`編輯:${g.n}(${g.f})`;
+  document.getElementById("edWu").value=g.wu;
+  document.getElementById("edZhi").value=g.zhi;
+  document.getElementById("edTong").value=g.tong;
+  document.getElementById("edSu").value=g.su;
+  document.getElementById("edCost").value=g.c;
+  document.getElementById("edRate").value=g.tac.rate;
+  document.getElementById("edImg").value=g.img||"";
+  document.getElementById("editor").classList.add("on");
+}
+function refreshAll(){renderTeam("my");renderTeam("foe");renderDex();renderOwnList();}
+document.getElementById("edSave").onclick=()=>{
+  const g=editing; if(!g)return;
+  const data={wu:+document.getElementById("edWu").value, zhi:+document.getElementById("edZhi").value,
+    tong:+document.getElementById("edTong").value, su:+document.getElementById("edSu").value,
+    c:+document.getElementById("edCost").value, rate:+document.getElementById("edRate").value,
+    img:document.getElementById("edImg").value.trim()};
+  g.wu=data.wu; g.zhi=data.zhi; g.tong=data.tong; g.su=data.su; g.c=data.c;
+  g.tac.rate=data.rate; g.img=data.img||undefined;
+  saveOverride(g.n,data);
+  document.getElementById("editor").classList.remove("on");
+  refreshAll();
+};
+document.getElementById("edReset").onclick=()=>{
+  if(!editing)return;
+  saveOverride(editing.n,null);
+  document.getElementById("editor").classList.remove("on");
+  location.reload();
+};
+document.getElementById("edCancel").onclick=()=>document.getElementById("editor").classList.remove("on");
+
+/* =====================================================
+   分頁 / 事件 / 初始化
+===================================================== */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  document.getElementById("tab-"+b.dataset.tab).classList.add("on");
+});
+document.querySelectorAll(".fxbtn").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".fxbtn").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); dexFx=b.dataset.fx; renderDex();
+});
+document.querySelectorAll("#picker .bar button[data-pf]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#picker .bar button[data-pf]").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); pickFx=b.dataset.pf; renderPickList();
+});
+document.getElementById("pickSearch").oninput=renderPickList;
+document.getElementById("pickClose").onclick=()=>document.getElementById("picker").classList.remove("on");
+document.getElementById("fightBtn").onclick=runSim;
+document.getElementById("costCap").onchange=()=>{updateCost("my");save();};
+function presetToTeam(p){
+  return p.team.map(m=>{
+    const b=m[2]||["","","",""];
+    return {gen:findGen(m[0]),tacs:[...m[1]],
+      bk:{sys:b[0]||"",big:b[1]||"",smalls:[b[2]||"",b[3]||""]},
+      red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}}};
+  });
+}
+document.getElementById("presetSel").onchange=e=>{
+  const p=PRESETS[e.target.selectedIndex];
+  if(!p.team)return;
+  foeTeam=presetToTeam(p);
+  renderTeam("foe"); save();
+};
+document.getElementById("myPresetSel").onchange=e=>{
+  const p=PRESETS[e.target.selectedIndex];
+  if(!p.team)return;
+  myTeam=presetToTeam(p);
+  renderTeam("my"); save();
+};
+document.getElementById("ownAll").onclick=()=>{GENERALS.forEach(g=>owned.add(g.n));renderOwnList();save();};
+document.getElementById("ownNone").onclick=()=>{owned.clear();renderOwnList();save();};
+document.getElementById("ownFromTeam").onclick=()=>{
+  myTeam.filter(Boolean).forEach(s=>owned.add(s.gen.n));renderOwnList();save();};
+document.getElementById("aiSuggest").onclick=()=>aiRun("suggest");
+document.getElementById("aiReview").onclick=()=>aiRun("review");
+document.getElementById("apiKey").onchange=e=>localStorage.setItem(KEY_KEY,e.target.value.trim());
+document.getElementById("geminiKey").onchange=e=>localStorage.setItem("sgz_gemini_key",e.target.value.trim());
+document.getElementById("aiProvider").onchange=e=>localStorage.setItem("sgz_ai_provider",e.target.value);
+
+// 標題印記:墨圈 + 燎字 + 朱點
+(function(){const cv=document.getElementById("logoCv"),x=cv.getContext("2d");
+ x.strokeStyle="#e9e2cf";x.lineWidth=6;
+ x.beginPath();x.arc(60,60,46,0.4,5.6);x.stroke();
+ x.strokeStyle="#ff4d2e";x.lineWidth=6;
+ x.beginPath();x.arc(60,60,46,5.7,6.6);x.stroke();
+ x.font='900 56px "Noto Serif TC",serif';x.textAlign="center";x.textBaseline="middle";
+ x.fillStyle="#e9e2cf";x.fillText("燎",60,64);
+ x.fillStyle="#c22a1a";x.fillRect(88,14,14,14);})();
+
+for(const id of ["presetSel","myPresetSel"])
+  PRESETS.forEach(p=>{const o=document.createElement("option");o.textContent=p.name;
+    document.getElementById(id).appendChild(o);});
+applyOverrides();
+load();
+refreshAll();
+</script>
+</body>
+</html>
