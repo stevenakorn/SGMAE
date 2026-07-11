@@ -198,7 +198,7 @@
     <h1>燎原軍議</h1>
     <p>三國志戰略版(台港澳服)｜配將 × 模擬對戰 × 回合優劣曲線 × AI 軍師</p>
   </div>
-  <span class="tag num">v6.5 · 帶兵鉗制+AI剋制</span>
+  <span class="tag num">v7.2</span>
 </header>
 
 <nav>
@@ -233,10 +233,11 @@
     <button id="fightBtn">開 戰</button>
     <label>模擬場數
       <select id="simN" class="num">
-        <option value="50">50</option>
-        <option value="200" selected>200</option>
+        <option value="200">200</option>
         <option value="500">500</option>
-        <option value="1000">1000</option>
+        <option value="1000" selected>1000</option>
+        <option value="5000">5000</option>
+        <option value="10000">10000</option>
       </select>
     </label>
     <span class="hint" id="simMsg"></span>
@@ -251,6 +252,7 @@
       <span><i style="background:#e8b34b"></i>優劣差(我−敵)</span>
     </div>
     <div id="roundlog"></div>
+    <div id="scorebox" style="margin-top:14px"></div>
   </div>
 </section>
 
@@ -1276,7 +1278,7 @@ function applyDamage(t,dmg,isFire=false){
 const sum=(units,team)=>units.filter(u=>u.team===team).reduce((a,u)=>a+u.troops,0);
 const allies=(units,u)=>units.filter(x=>!x.dead&&x.team===u.team);
 const enemies=(units,u)=>units.filter(x=>!x.dead&&x.team!==u.team);
-function simulateOnce(myT,foeT){
+function simulateOnce(myT,foeT,log){
   const units=[];
   myT.forEach((s,i)=>s&&units.push(makeUnit(s,"me",i)));
   foeT.forEach((s,i)=>s&&units.push(makeUnit(s,"foe",i)));
@@ -1299,7 +1301,9 @@ function simulateOnce(myT,foeT){
       // 普攻:繳械時跳過
       const tg=(u.disarm>0)?null:pickTargets(units,u,1)[0];
       if(tg){
+        const _b4=tg.troops;
         applyDamage(tg,attackDamage(u.g.wu*(1+u.buffAtk),tg.g.tong,aptMul,tr,1));
+        if(log)log.push({r,side:u.team,act:"普攻",src:u.g.n,tgt:tg.g.n,dmg:Math.round(_b4-tg.troops)});
         if(!tg.dead)for(const ct of tg.counters){
           applyDamage(u,attackDamage(tg.g.wu*(1+tg.buffAtk),u.g.tong,bestApt(tg.g),tg.troops/10000,ct.pow));
           if(u.dead)break;
@@ -1318,7 +1322,9 @@ function simulateOnce(myT,foeT){
           for(const e of tgs){
             if(t.pow>0){
               const d=attackDamage(stat*(1+u.buffAtk),e.g.tong,aptMul,tr,t.pow);
-              applyDamage(e,d,isFire);        // 命中當下的直接傷害(可含火傷放大)
+              const _b4=e.troops;
+              applyDamage(e,d,isFire);
+              if(log)log.push({r,side:u.team,act:t.name,src:u.g.n,tgt:e.g.n,dmg:Math.round(_b4-e.troops),fire:isFire});
               if(t.kind==="drain")u.troops=Math.min(u.maxTroops||10000,u.troops+d*.25);
               if(t.kind==="dot"){
                 // 存「原始」DoT 值(不預先乘 1.6);火傷放大只在每回合 tick 時判定一次
@@ -1328,6 +1334,7 @@ function simulateOnce(myT,foeT){
             }
             if(t.ctrl&&Math.random()<t.ctrl){
               const nm=t.name||"";
+              if(log)log.push({r,side:u.team,act:t.name,src:u.g.n,tgt:e.g.n,ctrl:true});
               if(/震懾|震慑|混亂|混乱/.test(nm))e.ctrlTurns=Math.max(e.ctrlTurns,1);      // 震懾/混亂:全擋
               else if(/計窮|计穷|技窮/.test(nm))e.silence=Math.max(e.silence,1);           // 計窮:擋主動
               else if(/繳械|缴械/.test(nm))e.disarm=Math.max(e.disarm,1);                  // 繳械:擋普攻
@@ -1336,7 +1343,8 @@ function simulateOnce(myT,foeT){
           }
         }else if(t.kind==="heal"){
           const low=allies(units,u).sort((a,b)=>a.troops-b.troops).slice(0,t.aoe||1);
-          low.forEach(a=>a.troops=Math.min(a.maxTroops||10000,a.troops+stat*(4.5*t.pow)*(1+(a.healBn||0))*(0.9+Math.random()*.2)));
+          low.forEach(a=>{const _b4=a.troops;a.troops=Math.min(a.maxTroops||10000,a.troops+stat*(4.5*t.pow)*(1+(a.healBn||0))*(0.9+Math.random()*.2));
+            if(log)log.push({r,side:u.team,act:t.name,src:u.g.n,tgt:a.g.n,heal:Math.round(a.troops-_b4)});});
         }
       }
       if(u.disarm>0)u.disarm--; if(u.silence>0)u.silence--;
@@ -1349,7 +1357,60 @@ function simulateOnce(myT,foeT){
       {while(curve.length<9)curve.push([sum(units,"me"),sum(units,"foe")]); break;}
   }
   const me=sum(units,"me"), foe=sum(units,"foe");
-  return {curve, win: me>foe?1:(me<foe?-1:0)};
+  const meAlive=units.some(u=>!u.dead&&u.team==="me");
+  const foeAlive=units.some(u=>!u.dead&&u.team==="foe");
+  let win;
+  if(meAlive&&!foeAlive)win=1;        // 我方全滅敵方 → 勝
+  else if(!meAlive&&foeAlive)win=-1;  // 我方被全滅 → 敗
+  else if(!meAlive&&!foeAlive)win=0;  // 同歸於盡 → 平
+  else{
+    // 8回合後雙方都有存活:比總兵力,差距<5%(以總兵計)視為勢均力敵=平
+    const diff=Math.abs(me-foe), tot=me+foe;
+    if(tot>0&&diff/tot<0.05)win=0;
+    else win=me>foe?1:-1;
+  }
+  return {curve, win};
+}
+/* ===== 配隊評分引擎(六維,純演算法) ===== */
+function scoreTeam(team){
+  const us=team.filter(Boolean);
+  if(us.length===0)return null;
+  const tacsOf=s=>[s.gen.tac,...s.tacs.map(findTac).filter(t=>t.kind!=="none")];
+  const bkOf=s=>{const a=[];if(s.bk){if(s.bk.big)a.push(s.bk.big);for(const x of(s.bk.smalls||[]))if(x)a.push(x);}return a.map(b=>BOOKS[b]).filter(Boolean);};
+  let dmg=0,ctrl=0,sust=0,stab=0,spd=0;
+  const facs={};
+  for(const s of us){
+    const g=s.gen, tacs=tacsOf(s), bks=bkOf(s);
+    facs[g.f]=(facs[g.f]||0)+1;
+    const atk=Math.max(g.wu,g.zhi);
+    let tp=0; for(const t of tacs)if(["dmg","dot","drain"].includes(t.kind))tp+=(t.pow||0)*(t.aoe||1);
+    const am={S:1.2,A:1,B:.85,C:.7}[g.apt[s.arm||bestArmOf(g)]]||1;
+    let bd=0; for(const b of bks)bd+=(b.d||0)+(b.dot||0);
+    dmg+=atk*am*0.35 + tp*22 + bd*180;
+    for(const t of tacs)if(t.ctrl)ctrl+=t.ctrl*(t.aoe||1)*35;
+    for(const t of tacs)if(t.kind==="ctrl")ctrl+=30;
+    for(const t of tacs){if(t.kind==="heal")sust+=(t.pow||0)*30;if(t.kind==="regen"||t.kind==="drain")sust+=25;}
+    for(const b of bks)sust+=(b.h||0)*400+(b.heal||0)*40;
+    sust+=g.tong*0.25;
+    for(const t of tacs)if(t.kind==="shield"||t.kind==="guard"||t.kind==="tengjia")stab+=(t.pow||0)*80;
+    for(const b of bks)stab+=(b.g||0)*350;
+    stab+=g.tong*0.3;
+    spd+=g.su;
+  }
+  const n=us.length;
+  const maxFac=Math.max(...Object.values(facs));
+  const totalCost=us.reduce((a,s)=>a+s.gen.c,0);
+  // 戰法協同:有指揮/陣法/治療的隊伍加分
+  let synergy=0;for(const s of us){const ts=tacsOf(s);
+    if(ts.some(t=>["指揮","陣法"].includes(t.type)))synergy+=6;
+    if(ts.some(t=>t.kind==="heal"))synergy+=6;}
+  let coex=35+(maxFac===n?30:maxFac===2?12:0)+synergy-Math.max(0,totalCost-20)*4;
+  coex=Math.max(0,Math.min(100,coex));
+  const nz=(v,lo,hi)=>Math.max(0,Math.min(100,Math.round((v-lo)/(hi-lo)*100)));
+  const out={輸出:nz(dmg/n,20,150),控制:nz(ctrl/n,0,50),續航:nz(sust/n,25,95),
+    穩定:nz(stab/n,20,100),共存:Math.round(coex),速度:nz(spd/n,55,150)};
+  out.總分=+((out.輸出*0.28+out.控制*0.15+out.續航*0.16+out.穩定*0.18+out.共存*0.13+out.速度*0.10)).toFixed(1);
+  return out;
 }
 function runSim(){
   const msg=document.getElementById("simMsg");
@@ -1370,8 +1431,9 @@ function runSim(){
 }
 function showResult(avg,w,l,d,N){
   document.getElementById("result").classList.add("on");
+  const pp=w/N, ci=1.96*Math.sqrt(pp*(1-pp)/N)*100;
   document.getElementById("winline").innerHTML=
-    `模擬 <span class="num">${N}</span> 場 → 我方勝 <b class="me num">${(w/N*100).toFixed(1)}%</b> ｜ 敵方勝 <b class="foe num">${(l/N*100).toFixed(1)}%</b> ｜ 平手 <span class="num">${(d/N*100).toFixed(1)}%</span>`;
+    `模擬 <span class="num">${N}</span> 場 → 我方勝 <b class="me num">${(w/N*100).toFixed(1)}%</b> <span class="hint" style="font-size:11px">±${ci.toFixed(1)}%</span> ｜ 敵方勝 <b class="foe num">${(l/N*100).toFixed(1)}%</b> ｜ 平手 <span class="num">${(d/N*100).toFixed(1)}%</span>`;
   drawChart(avg);
   const log=avg.map((p,i)=>{
     const diff=p[0]-p[1];
@@ -1380,8 +1442,31 @@ function showResult(avg,w,l,d,N){
     return `回合${i}  我${Math.round(p[0]).toString().padStart(5)}  敵${Math.round(p[1]).toString().padStart(5)}  差${diff>=0?"+":""}${Math.round(diff)} ${bar}`;
   }).join("\n");
   document.getElementById("roundlog").textContent=log;
+  renderScore();
   document.getElementById("result").scrollIntoView({behavior:"smooth"});
 }
+function renderScore(){
+  const box=document.getElementById("scorebox");
+  const sMe=scoreTeam(myTeam), sFoe=scoreTeam(foeTeam);
+  if(!sMe){box.innerHTML="";return;}
+  const axes=["輸出","控制","續航","穩定","共存","速度"];
+  const W=300,H=300,cx=W/2,cy=H/2,R=105;
+  const pt=(i,v)=>{const a=Math.PI*2*i/6-Math.PI/2;return[cx+Math.cos(a)*R*v/100,cy+Math.sin(a)*R*v/100];};
+  const poly=s=>axes.map((k,i)=>pt(i,s[k]).join(",")).join(" ");
+  let grid="";for(let gi=1;gi<=4;gi++){const rr=R*gi/4;
+    grid+='<polygon points="'+axes.map((_,i)=>{const a=Math.PI*2*i/6-Math.PI/2;return[cx+Math.cos(a)*rr,cy+Math.sin(a)*rr].join(",");}).join(" ")+'" fill="none" stroke="#243352" stroke-width="1"/>';}
+  let labels="";axes.forEach((k,i)=>{const p=pt(i,120);
+    labels+='<text x="'+p[0]+'" y="'+p[1]+'" fill="#8494b3" font-size="12" text-anchor="middle" dominant-baseline="middle">'+k+'</text>';});
+  box.innerHTML='<h2 style="margin:0 0 8px">配隊評分</h2>'+
+    '<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">'+
+    '<svg viewBox="0 0 '+W+' '+H+'" style="width:280px;max-width:100%">'+grid+labels+
+    '<polygon points="'+poly(sFoe||sMe)+'" fill="#f8717133" stroke="#f87171" stroke-width="2"/>'+
+    '<polygon points="'+poly(sMe)+'" fill="#4ade8033" stroke="#4ade80" stroke-width="2"/></svg>'+
+    '<div style="flex:1;min-width:180px"><div style="font-size:15px;margin-bottom:6px">我方總分 <b class="num" style="color:#4ade80;font-size:24px">'+sMe.總分+'</b>'+(sFoe?' <span class="hint">敵方 '+sFoe.總分+'</span>':'')+'</div>'+
+    axes.map(k=>'<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0"><span style="color:#8494b3">'+k+'</span><span class="num" style="color:#4ade80">'+sMe[k]+(sFoe?' <span style="color:#f87171;font-size:11px">/'+sFoe[k]+'</span>':'')+'</span></div>').join("")+
+    '</div></div><p class="hint">評分為演算法依隊伍組成(戰法/兵書/兵種/羈絆/統御)計算的相對指標,綠=我方 紅=敵方。</p>';
+}
+
 
 /* 回合優劣曲線:電競風(平滑曲線 + 光暈 + 面積填色) */
 function drawChart(avg){
@@ -1488,6 +1573,45 @@ async function aiRun(mode){
   let prompt;
   if(mode==="suggest"){
     if(owned.size<3){msg.textContent="⚠ 請至少勾選 3 名武將";return;}
+    // ── AI 2.0:演算法先枚舉+評分+模擬,再讓 AI 解釋 ──
+    msg.textContent="演算法評估候選隊伍中…"; btns.forEach(b=>b.disabled=true);
+    out.classList.add("on"); out.textContent="正在枚舉組合、評分、模擬勝率…";
+    await new Promise(r=>setTimeout(r,30));
+    const pool=[...owned].map(findGen).filter(Boolean);
+    // 枚舉三人組合(限制數量避免爆炸:池>12 時取評分潛力較高者)
+    let combos=[];
+    for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++)for(let k=j+1;k<pool.length;k++){
+      const c=pool[i].c+pool[j].c+pool[k].c;
+      if(c>21)continue; // 統御上限
+      combos.push([pool[i],pool[j],pool[k]]);
+    }
+    // 每組建成 slot(自帶戰法、最佳兵種、無兵書)先粗評分排序
+    const toSlots=g3=>g3.map(g=>({gen:g,tacs:["—(不攜帶)","—(不攜帶)"],arm:bestArmOf(g),troops:10000,
+      bk:{sys:"",big:"",smalls:["",""]},red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}},lv:{add:{wu:0,zhi:0,tong:0,su:0}}}));
+    let scored=combos.map(g3=>{const sl=toSlots(g3);return {g3,sl,score:scoreTeam(sl).總分};})
+      .sort((a,b)=>b.score-a.score).slice(0,12); // 取評分前12
+    // 對前12 跑快速模擬(vs 幾個強勢範本取平均勝率)
+    const foes=["富貴騎","麒麟弓","桃園盾"].map(n=>PRESETS.find(p=>p.team&&p.name.includes(n)))
+      .filter(Boolean).map(p=>p.team.map(m=>{const b=m[2]||["","","",""];const gg=findGen(m[0]);
+        return {gen:gg,tacs:[...m[1]],arm:bestArmOf(gg),troops:10000,bk:{sys:b[0],big:b[1],smalls:[b[2],b[3]]},
+          red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}},lv:{add:{wu:0,zhi:0,tong:0,su:0}}};}));
+    for(const s of scored){let w=0,tot=0;
+      for(const foe of foes){for(let i=0;i<120;i++){tot++;if(simulateOnce(s.sl,foe).win>0)w++;}}
+      s.wr=tot?Math.round(w/tot*100):0;}
+    scored.sort((a,b)=>(b.wr*0.6+b.score*0.4)-(a.wr*0.6+a.score*0.4));
+    const top=scored.slice(0,3);
+    const cand=top.map((s,i)=>{const sc=scoreTeam(s.sl);
+      return `候選${i+1}:${s.g3.map(g=>g.n).join("/")} | 演算法評分${s.score}(輸出${sc.輸出}控制${sc.控制}續航${sc.續航}穩定${sc.穩定}共存${sc.共存}速度${sc.速度}) | 對T0隊平均勝率${s.wr}%`;
+    }).join("\n");
+    msg.textContent="AI 解釋中…";
+    out.textContent="演算法已篩出 Top3,AI 分析中…\n\n"+cand;
+    prompt=`你是《三國志戰略版》(台港澳服)的資深配將軍師。以下是我用演算法從我的武將池中枚舉、評分、並對當前 T0 強隊模擬對戰後篩出的前三名候選隊伍(數據已驗證,非你臆測):\n${cand}\n\n請針對這三套隊伍,各自說明:建議的主將/中軍/前鋒位置、每人攜帶的 2 個額外戰法、兵書(系+大兵書+2小兵書)、出戰兵種,以及「為什麼這隊評分/勝率高」的戰術理由與弱點。可用戰法池:${tacListText()}。你擁有的武將:${[...owned].join("、")}。`;
+    try{ out.textContent=cand+"\n\n─── AI 軍師分析 ───\n"+await callAI(prompt); msg.textContent=""; }
+    catch(e){ out.textContent=cand+"\n\n⚠ AI 解釋失敗:"+e.message+"\n(但上方演算法數據有效)"; msg.textContent=""; }
+    btns.forEach(b=>b.disabled=false);
+    return;
+  }
+  if(false){
     prompt=`你是《三國志戰略版》(台港澳服)的資深配將軍師。我擁有的武將:${[...owned].join("、")}。可用的額外戰法池:${tacListText()}。兵書分六大系(始計/虛實/軍形/九變/作戰/用間),每系有大兵書與小兵書,每名武將只能選同一系的 1 個大兵書+2 個小兵書。各系兵書:${SYS_ORDER.map(s=>s+"系[大:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="big").join("/")+";小:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="small").join("/")+"]").join(" ")}。請只從我擁有的武將中,推薦 2-3 套三人隊伍(主將/中軍/前鋒),每套列出:隊名、三名武將與各自建議攜帶的 2 個額外戰法(限戰法池內)、每人的兵書(標明系+大兵書+2小兵書)、兵種建議、配隊理由與弱點。分析弱點時請考慮剋制關係:主動戰法輸出隊(如蜀弓/魏法)怕計窮,突擊暴擊隊(如吳騎/三勢呂)怕繳械,藤甲兵隊怕火攻戰法(火燒連營/熯天熾地等)。請用繁體中文、純文字條列(不要 Markdown 符號),精簡實用。`;
   }else{
     if(!myTeam.some(Boolean)){msg.textContent="⚠ 請先在「配將」頁組好我方隊伍";return;}
