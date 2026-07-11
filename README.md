@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -95,6 +94,11 @@
   .slot .rm:hover{background:#3a1512;}
   .tacs{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
   .tacs select{width:100%;font-size:12px;}
+  .armrow,.troprow{margin-top:6px;display:flex;gap:6px;align-items:center;}
+  .armrow .blab,.troprow .blab{font-size:11px;color:var(--faint);letter-spacing:1px;flex:0 0 48px;}
+  .armrow select{flex:1;font-size:11px;padding:4px;background:#0a0f1c;color:var(--cyan);border:1px solid var(--line);}
+  .troprow input[type=range]{flex:1;accent-color:var(--fire);}
+  .troprow .tropnum{width:66px;font-size:11px;padding:4px;background:#0a0f1c;color:var(--gold);border:1px solid var(--line);}
   .bk{margin-top:6px;display:flex;flex-direction:column;gap:4px;}
   .bkrow{display:flex;gap:4px;align-items:center;}
   .bkrow .blab,.redrow .blab{font-size:11px;color:var(--faint);letter-spacing:1px;flex:0 0 40px;}
@@ -194,7 +198,7 @@
     <h1>燎原軍議</h1>
     <p>三國志戰略版(台港澳服)｜配將 × 模擬對戰 × 回合優劣曲線 × AI 軍師</p>
   </div>
-  <span class="tag num">v6.0 · 六系兵書+紅度</span>
+  <span class="tag num">v6.5 · 帶兵鉗制+AI剋制</span>
 </header>
 
 <nav>
@@ -768,13 +772,11 @@ const BOOKS = {
  "掩虛":{sys:"九變",tier:"small",g:0.04},
  "馳援":{sys:"九變",tier:"small",h:0.015},
  "誘敵":{sys:"九變",tier:"small",d:0.03},
- "三裡而還":{sys:"軍形",tier:"big",counter:0.5,turn:3},
- "以直抱怨":{sys:"用間",tier:"big",counter:0.5,onctrl:true},
- "分而疾戰":{sys:"作戰",tier:"big",d:0.04},
+ "分而疾戰":{sys:"作戰",tier:"small",d:0.04},
  "勇毅":{sys:"軍形",tier:"small",g:0.03},
  "合變":{sys:"虛實",tier:"small",r:0.02},
  "惜兵愛民":{sys:"軍形",tier:"small",g:0.035},
- "疾戰突圍":{sys:"作戰",tier:"big",d:0.04},
+ "疾戰突圍":{sys:"虛實",tier:"big",d:0.04},
  "百戰":{sys:"作戰",tier:"small",d:0.035},
 };
 
@@ -783,7 +785,7 @@ const PRESETS = [
  {name:"— 自行配置 —",team:null},
  {name:"[T0] sp周瑜弓(SP貂蟬/SP周瑜/曹操)",team:[["SP貂蟬",["合軍聚眾","勠力同心"],["始計","三軍之眾","久戰",""]],["SP周瑜",["眾志成城","剛柔並濟"],["始計","應機立斷","久戰",""]],["曹操",["潛龍陣","草船借箭"],["始計","三軍之眾","錘煉",""]]]},
  {name:"[T0] 仙人盾-by大米(張角/于吉/左慈)",team:[["張角",["太平道法","士別三日"],["作戰","疾戰突圍","鬼謀",""]],["于吉",["鋒矢陣","草船借箭"],["九變","臨敵不亂","散仙",""]],["左慈",["竭力佐謀","刮骨療毒"],["九變","援其必攻","散仙",""]]]},
- {name:"[T0] 冠軍槍(SP關羽/SP荀彧/SP呂蒙)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","分而疾戰","百戰","掩虛"]],["SP荀彧",["非攻制勝","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["SP呂蒙",["草船借箭","三勢陣"],["九變","臨敵不亂","救主","掩虛"]]]},
+ {name:"[T0] 冠軍槍(SP關羽/SP荀彧/SP呂蒙)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","奇正相生","分而疾戰","百戰"]],["SP荀彧",["非攻制勝","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["SP呂蒙",["草船借箭","三勢陣"],["九變","臨敵不亂","救主","掩虛"]]]},
  {name:"[T0] 周劭蜀弓(諸葛亮/龐統/周劭)",team:[["諸葛亮",["雁行陣","刮骨療毒"],["始計","三軍之眾","錘煉",""]],["龐統",["太平道法","士別三日"],["虛實","後發先至","鬼謀",""]],["周劭",["當鋒摧決","乘敵不虞"],["始計","三軍之眾","銳利",""]]]},
  {name:"[T0] 嘟嘟弓(sp周瑜)(SP周瑜/陸遜/SP呂蒙)",team:[["SP周瑜",["刮骨療毒","勠力同心"],["始計","應機立斷","錘煉",""]],["陸遜",["功不唐捐","刮骨療毒"],["用間","出奇制勝","精准",""]],["SP呂蒙",["草船借箭","雁行陣"],["始計","三軍之眾","錘煉",""]]]},
  {name:"[T0] 嘟嘟弓(周瑜)(周瑜/陸遜/SP呂蒙)",team:[["周瑜",["奪魂挾魄","上兵伐謀"],["作戰","勝益而強","文韜",""]],["陸遜",["功不唐捐","刮骨療毒"],["用間","出奇制勝","精准",""]],["SP呂蒙",["草船借箭","雁行陣"],["始計","三軍之眾","錘煉",""]]]},
@@ -793,29 +795,29 @@ const PRESETS = [
  {name:"[T0] 富貴騎(SP荀彧/SP郭嘉/賈詡)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["始計","三軍之眾","錘煉",""]],["SP郭嘉",["奪魂挾魄","上兵伐謀"],["虛實","大謀不謀","鬼謀",""]],["賈詡",["靈機一動","勠力同心"],["始計","三軍之眾","久戰",""]]]},
  {name:"[T0] 山河盾(曹操/賈詡/郝昭)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","勵軍","掩虛"]],["賈詡",["奪魂挾魄","偽書相間"],["作戰","奇正相生","文韜","執銳"]],["郝昭",["士別三日","刮骨療毒"],["作戰","蠻勇非勇","文韜","執銳"]]]},
  {name:"[T0] 山河盾-by大米(曹操/賈詡/郝昭)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","援其必攻","勵軍",""]],["賈詡",["奪魂挾魄","當鋒摧決"],["作戰","奇正相生","文韜",""]],["郝昭",["刮骨療毒","士別三日"],["作戰","蠻勇非勇","文韜",""]]]},
- {name:"[T0] 張飛盾(潛龍)(周泰/張飛/SP袁紹)",team:[["周泰",["盛氣凌敵","潛龍陣"],["軍形","守而有道","守勢",""]],["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["SP袁紹",["陷陣營","掣刀斫敵"],["作戰","蠻勇非勇","勝戰",""]]]},
- {name:"[T0] 法關盾(劉備)(SP關羽/SP法正/劉備)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["劉備",["魚鱗陣","藤甲兵"],["九變","援其必攻","速戰",""]]]},
- {name:"[T0] 法關盾(馬岱)(SP關羽/SP法正/馬岱)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["馬岱",["魚鱗陣","藤甲兵"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 張飛盾(潛龍)(周泰/張飛/SP袁紹)",team:[["周泰",["盛氣凌敵","潛龍陣"],["軍形","守而有道","守勢",""]],["張飛",["疾風驟雨","橫掃千軍"],["用間","以直報怨","精准",""]],["SP袁紹",["陷陣營","掣刀斫敵"],["作戰","蠻勇非勇","勝戰",""]]]},
+ {name:"[T0] 法關盾(劉備)(SP關羽/SP法正/劉備)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","奇正相生","分而疾戰","百戰"]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["劉備",["魚鱗陣","藤甲兵"],["九變","援其必攻","速戰",""]]]},
+ {name:"[T0] 法關盾(馬岱)(SP關羽/SP法正/馬岱)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","奇正相生","分而疾戰","百戰"]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["馬岱",["魚鱗陣","藤甲兵"],["始計","三軍之眾","錘煉",""]]]},
  {name:"[T0] 溫侯弓(混)(左慈/呂布/許攸)",team:[["左慈",["武鋒陣","錦帆軍"],["九變","援其必攻","散仙","勵軍"]],["呂布",["暴戾無仁","速乘其利"],["作戰","一鼓作氣","勝戰","執銳"]],["許攸",["非攻制勝","當鋒摧決"],["作戰","奇正相生","文韜","藏刀"]]]},
  {name:"[T0] 溫侯弓-by大米(許攸/呂布/左慈)",team:[["許攸",["臨危救主","武鋒陣"],["始計","枕戈坐甲","錘煉",""]],["呂布",["當鋒摧決","摧鋒斷刃"],["用間","出奇制勝","精准",""]],["左慈",["先登死士","草船借箭"],["九變","援其必攻","掩虛",""]]]},
- {name:"[T0] 狗官槍(SP關羽/SP荀彧/程普)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","分而疾戰","百戰","掩虛"]],["SP荀彧",["非攻制勝","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["程普",["草船借箭","潛龍陣"],["九變","臨敵不亂","救主","掩虛"]]]},
+ {name:"[T0] 狗官槍(SP關羽/SP荀彧/程普)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","奇正相生","分而疾戰","百戰"]],["SP荀彧",["非攻制勝","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["程普",["草船借箭","潛龍陣"],["九變","臨敵不亂","救主","掩虛"]]]},
  {name:"[T0] 狗官騎(曹操/SP郭嘉/荀彧)",team:[["曹操",["草船借箭","飛熊軍"],["九變","臨敵不亂","勵軍","掩虛"]],["SP郭嘉",["奪魂挾魄","當鋒摧決"],["作戰","奇正相生","文韜","執銳"]],["荀彧",["竭力佐謀","刮骨療毒"],["九變","援其必攻","掩虛","勵軍"]]]},
- {name:"[T0] 皇冠槍(SP關羽/SP皇甫嵩/SP荀彧)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","分而疾戰","百戰","掩虛"]],["SP皇甫嵩",["草船借箭","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["SP荀彧",["非攻制勝","三勢陣"],["九變","臨敵不亂","救主","掩虛"]]]},
+ {name:"[T0] 皇冠槍(SP關羽/SP皇甫嵩/SP荀彧)",team:[["SP關羽",["忠勇義烈","掣刀斫敵"],["作戰","奇正相生","分而疾戰","百戰"]],["SP皇甫嵩",["草船借箭","威謀靡亢"],["虛實","後發先至","妙算","占卜"]],["SP荀彧",["非攻制勝","三勢陣"],["九變","臨敵不亂","救主","掩虛"]]]},
  {name:"[T0] 皇吳槍(孫權/程普/魯肅)",team:[["孫權",["當鋒摧決","兵無常勢"],["作戰","勝而益強","文韜","執銳"]],["程普",["草船借箭","撫輯軍民"],["軍形","無戰而勝","守勢","防備"]],["魯肅",["鋒矢陣","白毦兵"],["軍形","惜兵愛民","防備","守勢"]]]},
  {name:"[T0] 皇馬(SP馬超/SP皇甫嵩/許攸)",team:[["SP馬超",["當鋒摧決","速乘其利"],["作戰","勝而益強","藏刀","執銳"]],["SP皇甫嵩",["草船借箭","臨危救主"],["九變","援其必攻","救主","馳援"]],["許攸",["威謀靡亢","解煩衛"],["虛實","後發先至","妙算","占卜"]]]},
  {name:"[T0] 皇馬(混)(SP馬超/SP皇甫嵩/許攸)",team:[["SP馬超",["當鋒摧決","速乘其利"],["作戰","勝而益強","藏刀","執銳"]],["SP皇甫嵩",["草船借箭","臨危救主"],["九變","援其必攻","救主","馳援"]],["許攸",["威謀靡亢","解煩衛"],["虛實","後發先至","妙算","占卜"]]]},
  {name:"[T0] 皇馬槍(SP馬超/SP皇甫嵩/許攸)",team:[["SP馬超",["當鋒摧決","摧鋒斷刃"],["九變","援其必攻","速戰",""]],["SP皇甫嵩",["草船借箭","臨危救主"],["用間","審時度勢","開闔",""]],["許攸",["乘敵不虞","解煩衛"],["虛實","後發先至","妙算",""]]]},
  {name:"[T0] 盛氣蜀弓(姜維/龐統/諸葛亮)",team:[["姜維",["奪魂挾魄","上兵伐謀"],["作戰","蠻勇非勇","文韜",""]],["龐統",["太平道法","無當飛軍"],["虛實","後發先至","鬼謀",""]],["諸葛亮",["當鋒摧決","盛氣凌敵"],["作戰","奇正相生","文韜",""]]]},
- {name:"[T0] 等風熊(姜維/劉備/關銀屏)",team:[["姜維",["上兵伐謀","士別三日"],["作戰","蠻勇非勇","文韜",""]],["劉備",["鋒矢陣","刮骨療毒"],["九變","援其必攻","勵軍",""]],["關銀屏",["飛熊軍","草船借箭"],["作戰","分而疾戰","速戰",""]]]},
- {name:"[T0] 網紅槍(張飛/關銀屏/黃月英)",team:[["張飛",["裸衣血戰","摧鋒斷刃"],["用間","以直抱怨","精准",""]],["關銀屏",["疾風驟雨","橫掃千軍"],["虛實","以治擊亂","鬼謀",""]],["黃月英",["盛氣凌敵","大戟士"],["九變","誘敵之策","勵軍",""]]]},
+ {name:"[T0] 等風熊(姜維/劉備/關銀屏)",team:[["姜維",["上兵伐謀","士別三日"],["作戰","蠻勇非勇","文韜",""]],["劉備",["鋒矢陣","刮骨療毒"],["九變","援其必攻","勵軍",""]],["關銀屏",["飛熊軍","草船借箭"],["作戰","奇正相生","分而疾戰","速戰"]]]},
+ {name:"[T0] 網紅槍(張飛/關銀屏/黃月英)",team:[["張飛",["裸衣血戰","摧鋒斷刃"],["用間","以直報怨","精准",""]],["關銀屏",["疾風驟雨","橫掃千軍"],["虛實","以治擊亂","鬼謀",""]],["黃月英",["盛氣凌敵","大戟士"],["九變","誘敵之策","勵軍",""]]]},
  {name:"[T0] 群弓(SP袁紹/SP朱儁/沮授)",team:[["SP袁紹",["威謀靡亢","縱兵劫掠"],["作戰","勝而益強","勝戰","執銳"]],["SP朱儁",["無當飛軍","焰逐風飛"],["虛實","以治擊亂","將威","神機"]],["沮授",["八門金鎖陣","嬰城自守"],["作戰","奇正相生","文韜","執銳"]]]},
  {name:"[T0] 群弓-by大米(SP袁紹/SP朱儁/沮授)",team:[["SP袁紹",["掣刀斫敵","疾風驟雨"],["作戰","勝益而強","勝戰",""]],["SP朱儁",["焰逐風飛","焚輜營壘"],["虛實","以治擊亂","神機",""]],["沮授",["八門金鎖陣","無當飛軍"],["作戰","奇正相生","文韜",""]]]},
  {name:"[T0] 蘇信神火弓(周瑜/呂蒙/蘇信)",team:[["周瑜",["奪魂挾魄","上兵伐謀"],["作戰","勝益而強","文韜",""]],["呂蒙",["當鋒摧決","眾志成城"],["作戰","奇正相生","文韜",""]],["蘇信",["精・鋒矢陣","草船借箭"],["九變","臨敵不亂","勵軍",""]]]},
  {name:"[T0] 西風騎(姜維/趙雲/劉備)",team:[["姜維",["上兵伐謀","士別三日"],["作戰","蠻勇非勇","文韜",""]],["趙雲",["威謀靡亢","草船借箭"],["始計","樂善好施","歸心",""]],["劉備",["鋒矢陣","飛熊軍"],["九變","援其必攻","勵軍",""]]]},
- {name:"[T0] 關星盾(SP關羽/SP法正/無雙星彩)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["無雙星彩",["魚鱗陣","藤甲兵"],["始計","三軍之眾","錘煉",""]]]},
- {name:"[T0] 關關張-by大米(關羽/張飛/關銀屏)",team:[["關羽",["箕形陣","威謀靡亢"],["虛實","後發先至","鬼謀",""]],["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["關銀屏",["盛氣凌敵","青州兵"],["虛實","以治擊亂","神機",""]]]},
- {name:"[T0] 陳翊槍(張飛/關羽/陳翊)",team:[["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["關羽",["千里走單騎","盛氣凌敵"],["虛實","後發先至","鬼謀",""]],["陳翊",["奇計良謀","挫銳"],["作戰","蠻勇非勇","勝戰",""]]]},
- {name:"[T0] 陳翊盾(張飛/關羽/陳翊)",team:[["張飛",["疾風驟雨","橫掃千軍"],["用間","以直抱怨","精准",""]],["關羽",["盛氣凌敵","絕其汲道"],["虛實","後發先至","鬼謀",""]],["陳翊",["陷陣營","箕形陣"],["軍形","守而有道","守勢",""]]]},
+ {name:"[T0] 關星盾(SP關羽/SP法正/無雙星彩)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","奇正相生","分而疾戰","百戰"]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]],["無雙星彩",["魚鱗陣","藤甲兵"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0] 關關張-by大米(關羽/張飛/關銀屏)",team:[["關羽",["箕形陣","威謀靡亢"],["虛實","後發先至","鬼謀",""]],["張飛",["疾風驟雨","橫掃千軍"],["用間","以直報怨","精准",""]],["關銀屏",["盛氣凌敵","青州兵"],["虛實","以治擊亂","神機",""]]]},
+ {name:"[T0] 陳翊槍(張飛/關羽/陳翊)",team:[["張飛",["疾風驟雨","橫掃千軍"],["用間","以直報怨","精准",""]],["關羽",["千里走單騎","盛氣凌敵"],["虛實","後發先至","鬼謀",""]],["陳翊",["奇計良謀","挫銳"],["作戰","蠻勇非勇","勝戰",""]]]},
+ {name:"[T0] 陳翊盾(張飛/關羽/陳翊)",team:[["張飛",["疾風驟雨","橫掃千軍"],["用間","以直報怨","精准",""]],["關羽",["盛氣凌敵","絕其汲道"],["虛實","後發先至","鬼謀",""]],["陳翊",["陷陣營","箕形陣"],["軍形","守而有道","守勢",""]]]},
  {name:"[T0] 陳翊神火弓(周瑜/呂蒙/陳翊)",team:[["周瑜",["奪魂挾魄","上兵伐謀"],["作戰","勝益而強","文韜",""]],["呂蒙",["當鋒摧決","眾志成城"],["作戰","奇正相生","文韜",""]],["陳翊",["精・鋒矢陣","深謀遠慮"],["始計","三軍之眾","久戰",""]]]},
  {name:"[T0] 飛熊魏法騎(SP荀彧/賈詡/SP郭嘉)",team:[["SP荀彧",["竭力佐謀","刮骨療毒"],["軍形","惜兵愛民","守勢","防備"]],["賈詡",["嬰城自守","飛熊軍"],["九變","示敵以弱","百戰","掩虛"]],["SP郭嘉",["奪魂挾魄","折衝禦侮"],["作戰","奇正相生","文韜","執銳"]]]},
  {name:"[T0] 黃巾盾(張角/SP張寶/SP張梁)",team:[["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["SP張寶",["草船借箭","藤甲兵"],["軍形","無戰而勝","守勢","防備"]],["SP張梁",["暫避其鋒","刮骨療毒"],["九變","臨敵不亂","勵軍","掩虛"]]]},
@@ -844,7 +846,7 @@ const PRESETS = [
  {name:"[T0.5] 滿寵魏法盾(曹操/賈詡/滿寵)",team:[["曹操",["撫輯軍民","草船借箭"],["九變","臨敵不亂","勵軍","掩虛"]],["賈詡",["奪魂挾魄","偽書相間"],["作戰","奇正相生","文韜","執銳"]],["滿寵",["刮骨療毒","士別三日"],["九變","援其必攻","勵軍","掩虛"]]]},
  {name:"[T0.5] 潛龍陣(賈詡/趙雲/左慈)",team:[["賈詡",["潛龍陣","偽書相間"],["虛實","以治擊亂","神機","鬼謀"]],["趙雲",["草船借箭","威謀靡亢"],["九變","援其必攻","勵軍","掩虛"]],["左慈",["象兵","刮骨療毒"],["九變","援其必攻","散仙","掩虛"]]]},
  {name:"[T0.5] 皇甫宏皇馬槍(SP馬超/皇甫宏/許攸)",team:[["SP馬超",["當鋒摧決","摧鋒斷刃"],["九變","援其必攻","速戰",""]],["皇甫宏",["草船借箭","魅惑"],["用間","審時度勢","開闔",""]],["許攸",["臨危救主","解煩衛"],["虛實","後發先至","妙算",""]]]},
- {name:"[T0.5] 皇甫法關盾(SP關羽/皇甫宏/SP法正)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","分而疾戰","百戰",""]],["皇甫宏",["魚鱗陣","魅惑"],["始計","三軍之眾","錘煉",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]]]},
+ {name:"[T0.5] 皇甫法關盾(SP關羽/皇甫宏/SP法正)",team:[["SP關羽",["以寡敵眾","擊其惰歸"],["作戰","奇正相生","分而疾戰","百戰"]],["皇甫宏",["魚鱗陣","魅惑"],["始計","三軍之眾","錘煉",""]],["SP法正",["蓄勢待發","非攻制勝"],["始計","三軍之眾","錘煉",""]]]},
  {name:"[T0.5] 蕭芷太尉盾(司馬懿/蕭芷/滿寵)",team:[["司馬懿",["熯天熾地","眾志成城"],["始計","三軍之眾","久戰",""]],["蕭芷",["獨行赴鬥","魅惑"],["始計","三軍之眾","錘煉",""]],["滿寵",["形一陣","蓄勢待發"],["始計","三軍之眾","錘煉",""]]]},
  {name:"[T0.5] 蘇信孫權騎(孫權/蘇信/周泰)",team:[["孫權",["文武雙全","當鋒摧決"],["作戰","勝益而強","執銳",""]],["蘇信",["鋒矢陣","奇計良謀"],["始計","三軍之眾","錘煉",""]],["周泰",["合軍聚眾","飛熊軍"],["始計","三軍之眾","錘煉",""]]]},
  {name:"[T0.5] 虎臣弓(甘寧/太史慈/周泰)",team:[["甘寧",["破軍威勝","橫掃千軍"],["虛實","以治擊亂","鬼謀","將威"]],["太史慈",["折衝禦侮","當鋒摧決"],["作戰","勝而益強","武略","執銳"]],["周泰",["盛氣凌敵","錦帆軍"],["軍形","守而有道","防備","守勢"]]]},
@@ -866,7 +868,7 @@ const PRESETS = [
  {name:"[T1] 天水弓(姜維/諸葛亮/趙雲)",team:[["姜維",["奪魂挾魄","杯蛇鬼車"],["作戰","蠻勇非勇","文韜","執銳"]],["諸葛亮",["八門金鎖陣","嬰城自守"],["九變","援其必攻","勵軍","馳援"]],["趙雲",["破陣摧堅","萬箭齊發"],["虛實","以治擊亂","神機","鬼謀"]]]},
  {name:"[T1] 孫太周(孫權/太史慈/周泰)",team:[["孫權",["當鋒摧決","兵無常勢"],["作戰","勝而益強","文韜","執銳"]],["太史慈",["折衝禦侮","速乘其利"],["作戰","勝而益強","武略","執銳"]],["周泰",["草船借箭","撫輯軍民"],["軍形","守而有道","守勢","防備"]]]},
  {name:"[T1] 張角群盾(張角/蔡文姬/華佗)",team:[["張角",["太平道法","士別三日"],["虛實","疾戰突圍","鬼謀","將威"]],["蔡文姬",["鋒矢陣","魅惑"],["九變","援其必攻","百戰","掩虛"]],["華佗",["刮骨療毒","威謀靡亢"],["九變","援其必攻","散仙","掩虛"]]]},
- {name:"[T1] 惇惇盾(曹操/夏侯惇/滿寵)",team:[["曹操",["藤甲兵","草船借箭"],["軍形","嚴陣以待","守勢",""]],["夏侯惇",["氣凌三軍","眾動萬計"],["軍形","三裡而還","鐵甲",""]],["滿寵",["刮骨療毒","非攻制勝"],["九變","援其必攻","勵軍",""]]]},
+ {name:"[T1] 惇惇盾(曹操/夏侯惇/滿寵)",team:[["曹操",["藤甲兵","草船借箭"],["軍形","嚴陣以待","守勢",""]],["夏侯惇",["氣凌三軍","眾動萬計"],["軍形","三里而還","鐵甲",""]],["滿寵",["刮骨療毒","非攻制勝"],["九變","援其必攻","勵軍",""]]]},
  {name:"[T1] 才俊槍(姜維/關銀屏/諸葛亮)",team:[["姜維",["奪魂挾魄","火熾原燎"],["作戰","蠻勇非勇","文韜","執銳"]],["關銀屏",["據水斷橋","青州兵"],["虛實","以治擊亂","神機",""]],["諸葛亮",["暫避其鋒","刮骨療毒"],["九變","援其必攻","救主","掩虛"]]]},
  {name:"[T1] 楊琪五謀臣(楊琪/賈詡/荀攸)",team:[["楊琪",["知己知彼","勠力同心"],["始計","三軍之眾","錘煉",""]],["賈詡",["靈機一動","焚輜營壘"],["始計","三軍之眾","錘煉",""]],["荀攸",["奪魂挾魄","上兵伐謀"],["始計","三軍之眾","錘煉",""]]]},
  {name:"[T1] 武鋒陣(程普/黃忠/左慈)",team:[["程普",["撫輯軍民","草船借箭"],["軍形","無戰而勝","守勢","防備"]],["黃忠",["擊其惰歸","剛勇無前"],["虛實","疾戰突圍","鬼謀","將威"]],["左慈",["武鋒陣","陷陣營"],["九變","援其必攻","散仙","掩虛"]]]},
@@ -978,7 +980,7 @@ function saveOverride(n,data){
   localStorage.setItem(OVR_KEY,JSON.stringify(o));
 }
 function save(){
-  const pack=t=>t.map(s=>s?{n:s.gen.n,tacs:s.tacs,bk:s.bk||{sys:"",big:"",smalls:["",""]},red:s.red||{star:0,add:{wu:0,zhi:0,tong:0,su:0}}}:null);
+  const pack=t=>t.map(s=>s?{n:s.gen.n,tacs:s.tacs,arm:s.arm,troops:s.troops,bk:s.bk||{sys:"",big:"",smalls:["",""]},red:s.red||{star:0,add:{wu:0,zhi:0,tong:0,su:0}},lv:s.lv||{add:{wu:0,zhi:0,tong:0,su:0}}}:null);
   localStorage.setItem(SAVE_KEY,JSON.stringify({my:pack(myTeam),foe:pack(foeTeam),
     cap:document.getElementById("costCap").value}));
   localStorage.setItem(OWN_KEY,JSON.stringify([...owned]));
@@ -987,7 +989,7 @@ function load(){
   try{
     const d=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
     if(d){
-      const un=a=>(a||[]).map(s=>s&&findGen(s.n)?{gen:findGen(s.n),tacs:s.tacs||["—(不攜帶)","—(不攜帶)"],bk:s.bk||{sys:"",big:"",smalls:["",""]},red:s.red||{star:0,add:{wu:0,zhi:0,tong:0,su:0}}}:null);
+      const un=a=>(a||[]).map(s=>s&&findGen(s.n)?{gen:findGen(s.n),tacs:s.tacs||["—(不攜帶)","—(不攜帶)"],arm:s.arm||bestArmOf(findGen(s.n)),troops:Math.max(1000,Math.min(10000,s.troops!=null?s.troops:10000)),bk:s.bk||{sys:"",big:"",smalls:["",""]},red:s.red||{star:0,add:{wu:0,zhi:0,tong:0,su:0}},lv:s.lv||{add:{wu:0,zhi:0,tong:0,su:0}}}:null);
       myTeam=un(d.my); foeTeam=un(d.foe);
       while(myTeam.length<3)myTeam.push(null); while(foeTeam.length<3)foeTeam.push(null);
       if(d.cap)document.getElementById("costCap").value=d.cap;
@@ -1033,6 +1035,28 @@ function renderTeam(side){
         tacs.appendChild(sel);
       });
       d.appendChild(tacs);
+      // 出戰兵種(依適性套 SABC 倍率到四維)
+      if(!slot.arm)slot.arm=bestArmOf(g);
+      const armrow=document.createElement("div"); armrow.className="armrow";
+      armrow.insertAdjacentHTML("beforeend",'<span class="blab">出戰兵種</span>');
+      const selArm=document.createElement("select");
+      ARM_KEYS.forEach(k=>{const rk=g.apt[k];const mul=Math.round((APT_MULT[rk]||1)*100);
+        const o=document.createElement("option");o.value=k;
+        o.textContent=`${k}兵 ${rk}(${mul}%)`; if(k===slot.arm)o.selected=true; selArm.appendChild(o);});
+      selArm.onchange=()=>{slot.arm=selArm.value; save(); renderTeam(side);};
+      armrow.appendChild(selArm); d.appendChild(armrow);
+      // 帶兵量(拉條 + 輸入框連動)
+      if(slot.troops==null)slot.troops=10000;
+      const trow=document.createElement("div"); trow.className="troprow";
+      trow.insertAdjacentHTML("beforeend",'<span class="blab">帶兵量</span>');
+      const rng=document.createElement("input");rng.type="range";rng.min=1000;rng.max=10000;rng.step=500;rng.value=slot.troops;
+      const numI=document.createElement("input");numI.type="number";numI.min=1000;numI.max=10000;numI.step=500;numI.value=slot.troops;numI.className="tropnum num";
+      const syncTr=v=>{v=Math.max(1000,Math.min(10000,parseInt(v)||10000));
+        slot.troops=v; rng.value=v; numI.value=v; save();};
+      rng.oninput=()=>{numI.value=rng.value; slot.troops=+rng.value;};
+      rng.onchange=()=>syncTr(rng.value);
+      numI.onchange=()=>syncTr(numI.value);
+      trow.appendChild(rng); trow.appendChild(numI); d.appendChild(trow);
       // 兵書:三段階層(系 → 大兵書 → 小兵書×2)
       if(!slot.bk)slot.bk={sys:"",big:"",smalls:["",""]};
       const bwrap=document.createElement("div"); bwrap.className="bk";
@@ -1073,6 +1097,25 @@ function renderTeam(side){
         bwrap.appendChild(rowSm);
       }
       d.appendChild(bwrap);
+      // 等級自由屬性點(Lv50 固定 40 點,與紅度分開)
+      if(!slot.lv)slot.lv={add:{wu:0,zhi:0,tong:0,su:0}};
+      const LVCAP=40;
+      const lvUsed=slot.lv.add.wu+slot.lv.add.zhi+slot.lv.add.tong+slot.lv.add.su;
+      const lvhead=document.createElement("div"); lvhead.className="redrow";
+      lvhead.insertAdjacentHTML("beforeend",`<span class="blab">升級點</span><span class="rcap num">剩 ${LVCAP-lvUsed}/${LVCAP}</span><span class="hint" style="margin:0;font-size:10px">Lv50 共40點</span>`);
+      d.appendChild(lvhead);
+      const lvrow=document.createElement("div"); lvrow.className="addrow";
+      [["wu","武"],["zhi","智"],["tong","統"],["su","速"]].forEach(([k,lab])=>{
+        const box=document.createElement("span"); box.className="addbox";
+        box.insertAdjacentHTML("beforeend",`<label>${lab}</label>`);
+        const inp=document.createElement("input");inp.type="number";inp.min=0;inp.value=slot.lv.add[k];
+        inp.onchange=()=>{let v=Math.max(0,parseInt(inp.value)||0);
+          const others=lvUsed-slot.lv.add[k];
+          if(v+others>LVCAP)v=Math.max(0,LVCAP-others);
+          slot.lv.add[k]=v; save(); renderTeam(side);};
+        box.appendChild(inp); lvrow.appendChild(box);
+      });
+      d.appendChild(lvrow);
       // 紅度 + 自由加點
       if(!slot.red)slot.red={star:0,add:{wu:0,zhi:0,tong:0,su:0}};
       const rrow=document.createElement("div"); rrow.className="redrow";
@@ -1082,8 +1125,9 @@ function renderTeam(side){
         o.textContent="+"+s+"紅"; if(s===slot.red.star)o.selected=true; selR.appendChild(o);}
       selR.onchange=()=>{slot.red.star=+selR.value;
         const cap=slot.red.star*10;const a=slot.red.add;
-        let sum=a.wu+a.zhi+a.tong+a.su; if(sum>cap){a.wu=a.zhi=a.tong=a.su=0;}
-        save();renderTeam(side);};
+        let sum=a.wu+a.zhi+a.tong+a.su;
+        if(sum>cap){a.wu=0;a.zhi=0;a.tong=0;a.su=0;} // 超額全歸零
+        save();renderTeam(side);}; // 重繪 → 輸入框同步回實際值
       rrow.appendChild(selR);
       const cap=slot.red.star*10;
       const used=slot.red.add.wu+slot.red.add.zhi+slot.red.add.tong+slot.red.add.su;
@@ -1145,7 +1189,7 @@ function renderPickList(){
       <div class="sub">★${g.s} 統御${g.c}｜${g.tac.name}<br>武${g.wu} 智${g.zhi} 統${g.tong} 速${g.su}</div></div>`);
     c.onclick=()=>{
       if(usedHere.has(g.n))return;
-      team[pickTarget.idx]={gen:g,tacs:["—(不攜帶)","—(不攜帶)"],bk:{sys:"",big:"",smalls:["",""]},red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}}};
+      team[pickTarget.idx]={gen:g,tacs:["—(不攜帶)","—(不攜帶)"],arm:bestArmOf(g),troops:10000,bk:{sys:"",big:"",smalls:["",""]},red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}},lv:{add:{wu:0,zhi:0,tong:0,su:0}}};
       document.getElementById("picker").classList.remove("on");
       renderTeam(pickTarget.side); save();
     };
@@ -1156,15 +1200,27 @@ function renderPickList(){
 /* =====================================================
    模擬引擎(簡化趨勢模型,同 v1 驗證版)
 ===================================================== */
-const APT_MULT={S:1.15,A:1.0,B:.85,C:.7};
+const APT_MULT={S:1.20,A:1.0,B:.85,C:.70};
+const ARM_KEYS=["騎","槍","弓","盾","器"];
+function bestArmOf(g){let best="騎";for(const k of ARM_KEYS)if((APT_MULT[g.apt[k]]||0)>(APT_MULT[g.apt[best]]||0))best=k;return best;}
 function bestApt(g){let best="C";for(const k of["騎","槍","弓","盾","器"]){
   if(APT_MULT[g.apt[k]]>APT_MULT[best])best=g.apt[k];}return APT_MULT[best];}
 function makeUnit(slot,team,pos){
   const g=slot.gen;
-  // 紅度加點(疊到有效四維)
+  // 紅度加點 + 等級自由點(兩套分開,皆為玩家自由分配)
   const ra=(slot.red&&slot.red.add)||{wu:0,zhi:0,tong:0,su:0};
-  const eg={n:g.n,f:g.f,s:g.s,c:g.c,apt:g.apt,tac:g.tac,
-    wu:g.wu+(ra.wu||0),zhi:g.zhi+(ra.zhi||0),tong:g.tong+(ra.tong||0),su:g.su+(ra.su||0)};
+  const la=(slot.lv&&slot.lv.add)||{wu:0,zhi:0,tong:0,su:0};
+  // 出戰兵種適性倍率:S1.2 A1.0 B0.85 C0.7,乘到四維
+  const arm=slot.arm||bestArmOf(g);
+  const am=APT_MULT[g.apt[arm]]||1;
+  const base={
+    wu:(g.wu+(ra.wu||0)+(la.wu||0))*am,
+    zhi:(g.zhi+(ra.zhi||0)+(la.zhi||0))*am,
+    tong:(g.tong+(ra.tong||0)+(la.tong||0))*am,
+    su:(g.su+(ra.su||0)+(la.su||0))*am };
+  const eg={n:g.n,f:g.f,s:g.s,c:g.c,apt:g.apt,tac:g.tac,arm,
+    wu:Math.round(base.wu),zhi:Math.round(base.zhi),
+    tong:Math.round(base.tong),su:Math.round(base.su)};
   const tacs=[g.tac,...slot.tacs.map(findTac).filter(t=>t.kind!=="none")];
   let dmgReduce=tacs.filter(t=>t.kind==="guard").reduce((a,t)=>a+t.pow,0);
   const counters=tacs.filter(t=>t.kind==="counter");
@@ -1184,7 +1240,9 @@ function makeUnit(slot,team,pos){
   dmgReduce=Math.min(.5,dmgReduce);
   const vulnFire=tacs.some(t=>/藤甲/.test(t.name)||t.kind==="tengjia");
   const tengjiaSelf=tacs.some(t=>t.kind==="tengjia")?0.25:0;
-  const u={g:eg,team,pos,troops:10000,tacs,dmgReduce,counters,vulnFire,
+  const troops0=Math.max(1000,Math.min(10000,(slot.troops!=null?slot.troops:10000)));
+  const u={g:eg,team,pos,troops:troops0,maxTroops:troops0,tacs,dmgReduce,counters,vulnFire,
+    disarm:0,silence:0,
     tengjia:tengjiaSelf,
     buffAtk:bd,shield:0,ctrlTurns:0,dot:0,dead:false,
     bookRegen:bh,rateBn:br,dotBn:bDot,dotDef:bDotDef,healBn:bHeal};
@@ -1192,8 +1250,11 @@ function makeUnit(slot,team,pos){
   return u;
 }
 function attackDamage(atkStat,def,aptMul,troopRatio,pow=1){
-  const base=(atkStat*2.6-Math.max(def,110)*1.3)*aptMul;
-  return Math.max(300*pow,base*pow*(0.6+0.8*troopRatio))*(0.92+Math.random()*0.16);
+  // 相除法:曲線遞減,高統率邊際遞減、永不為負
+  const base=(atkStat*atkStat)/(atkStat+def*1.35)*5.2;
+  // 殘兵根號正比:兵越少傷害越低
+  const troopMul=Math.sqrt(Math.max(0,troopRatio));
+  return base*pow*troopMul*(0.92+Math.random()*0.16);
 }
 function pickTargets(units,me,n){
   const foes=units.filter(u=>!u.dead&&u.team!==me.team);
@@ -1222,7 +1283,7 @@ function simulateOnce(myT,foeT){
   const curve=[[sum(units,"me"),sum(units,"foe")]];
   for(const u of units)for(const t of u.tacs){
     if(t.type==="指揮"||t.type==="被動"||t.type==="陣法"||t.type==="兵種"){
-      if(t.kind==="shield")((t.aoe||1)>1?allies(units,u):[u]).forEach(a=>a.shield+=a.troops*t.pow);
+      if(t.kind==="shield")((t.aoe||1)>1?allies(units,u):[u]).forEach(a=>a.shield+=(a.maxTroops||a.troops)*t.pow);
       if(t.kind==="tengjia")allies(units,u).forEach(a=>{a.tengjia=Math.max(a.tengjia||0,t.pow);a.vulnFire=true;});
       if(t.kind==="buff")  ((t.aoe||0)>1?allies(units,u):[u]).forEach(a=>a.buffAtk+=t.pow);
       if(t.kind==="debuff")enemies(units,u).forEach(e=>e.buffAtk-=t.pow*(u.g.zhi/220));
@@ -1233,9 +1294,10 @@ function simulateOnce(myT,foeT){
     for(const u of order){
       if(u.dead)continue;
       if(u.dot>0){applyDamage(u,u.dot,!!u.dotFire); if(u.dead)continue;}
-      if(u.ctrlTurns>0){u.ctrlTurns--; continue;}
-      const aptMul=bestApt(u.g), tr=u.troops/10000;
-      const tg=pickTargets(units,u,1)[0];
+      if(u.ctrlTurns>0){u.ctrlTurns--; if(u.disarm>0)u.disarm--; if(u.silence>0)u.silence--; continue;}
+      const aptMul=1, tr=u.troops/(u.maxTroops||u.troops||10000);
+      // 普攻:繳械時跳過
+      const tg=(u.disarm>0)?null:pickTargets(units,u,1)[0];
       if(tg){
         applyDamage(tg,attackDamage(u.g.wu*(1+u.buffAtk),tg.g.tong,aptMul,tr,1));
         if(!tg.dead)for(const ct of tg.counters){
@@ -1246,6 +1308,8 @@ function simulateOnce(myT,foeT){
       }
       for(const t of u.tacs){
         if(t.type==="指揮"||t.type==="被動"||t.type==="陣法"||t.type==="兵種")continue;
+        if(u.silence>0&&t.type==="主動")continue;   // 計窮:只封主動戰法
+        if(u.disarm>0&&t.type==="突擊")continue;    // 繳械:封普攻與突擊戰法
         if(Math.random()>t.rate+(u.rateBn||0))continue;
         const stat=t.stat==="zhi"?u.g.zhi:u.g.wu;
         const isFire=/火|焰|熾|燒|焚|燎/.test(t.name)||t.name==="苦肉計";
@@ -1254,20 +1318,31 @@ function simulateOnce(myT,foeT){
           for(const e of tgs){
             if(t.pow>0){
               const d=attackDamage(stat*(1+u.buffAtk),e.g.tong,aptMul,tr,t.pow);
-              applyDamage(e,d,isFire);
-              if(t.kind==="drain")u.troops=Math.min(10000,u.troops+d*.25);
-              if(t.kind==="dot"){e.dot+=d*.35*(1+(u.dotBn||0))*(1-(e.dotDef||0)); if(isFire)e.dotFire=true;}
+              applyDamage(e,d,isFire);        // 命中當下的直接傷害(可含火傷放大)
+              if(t.kind==="drain")u.troops=Math.min(u.maxTroops||10000,u.troops+d*.25);
+              if(t.kind==="dot"){
+                // 存「原始」DoT 值(不預先乘 1.6);火傷放大只在每回合 tick 時判定一次
+                e.dot+=d*.35*(1+(u.dotBn||0))*(1-(e.dotDef||0));
+                if(isFire)e.dotFire=true;
+              }
             }
-            if(t.ctrl&&Math.random()<t.ctrl)e.ctrlTurns=Math.max(e.ctrlTurns,1);
+            if(t.ctrl&&Math.random()<t.ctrl){
+              const nm=t.name||"";
+              if(/震懾|震慑|混亂|混乱/.test(nm))e.ctrlTurns=Math.max(e.ctrlTurns,1);      // 震懾/混亂:全擋
+              else if(/計窮|计穷|技窮/.test(nm))e.silence=Math.max(e.silence,1);           // 計窮:擋主動
+              else if(/繳械|缴械/.test(nm))e.disarm=Math.max(e.disarm,1);                  // 繳械:擋普攻
+              else e.ctrlTurns=Math.max(e.ctrlTurns,1);                                    // 預設當震懾
+            }
           }
         }else if(t.kind==="heal"){
           const low=allies(units,u).sort((a,b)=>a.troops-b.troops).slice(0,t.aoe||1);
-          low.forEach(a=>a.troops=Math.min(10000,a.troops+stat*(4.5*t.pow)*(1+(a.healBn||0))*(0.9+Math.random()*.2)));
+          low.forEach(a=>a.troops=Math.min(a.maxTroops||10000,a.troops+stat*(4.5*t.pow)*(1+(a.healBn||0))*(0.9+Math.random()*.2)));
         }
       }
+      if(u.disarm>0)u.disarm--; if(u.silence>0)u.silence--;
       let regen=(u.bookRegen||0);
       for(const t of u.tacs)if(t.kind==="regen")regen+=t.pow;
-      if(regen>0)u.troops=Math.min(10000,u.troops+10000*regen);
+      if(regen>0)u.troops=Math.min(u.maxTroops||10000,u.troops+(u.maxTroops||10000)*regen);
     }
     curve.push([sum(units,"me"),sum(units,"foe")]);
     if(!units.some(u=>!u.dead&&u.team==="me")||!units.some(u=>!u.dead&&u.team==="foe"))
@@ -1312,7 +1387,8 @@ function showResult(avg,w,l,d,N){
 function drawChart(avg){
   const cv=document.getElementById("chart"), x=cv.getContext("2d");
   const W=cv.width,H=cv.height, padL=72,padR=24,padT=28,padB=44;
-  const pw=W-padL-padR, ph=H-padT-padB, maxY=30000;
+  const pw=W-padL-padR, ph=H-padT-padB;
+  const maxY=Math.max(3000,...avg.map(p=>Math.max(p[0],p[1])))*1.05;
   x.clearRect(0,0,W,H);
   x.fillStyle="#080b12"; x.fillRect(0,0,W,H);
   // 網格
@@ -1328,7 +1404,7 @@ function drawChart(avg){
   const zero=padT+ph*.5;
   for(let r=0;r<avg.length;r++){
     const diff=avg[r][0]-avg[r][1];
-    const px=padL+pw*r/8, h=diff/30000*ph;
+    const px=padL+pw*r/8, h=diff/(maxY*2)*ph;
     x.fillStyle=diff>=0?"rgba(232,179,75,.30)":"rgba(232,179,75,.18)";
     x.fillRect(px-7,Math.min(zero,zero-h),14,Math.abs(h));
   }
@@ -1412,7 +1488,7 @@ async function aiRun(mode){
   let prompt;
   if(mode==="suggest"){
     if(owned.size<3){msg.textContent="⚠ 請至少勾選 3 名武將";return;}
-    prompt=`你是《三國志戰略版》(台港澳服)的資深配將軍師。我擁有的武將:${[...owned].join("、")}。可用的額外戰法池:${tacListText()}。兵書分六大系(始計/虛實/軍形/九變/作戰/用間),每系有大兵書與小兵書,每名武將只能選同一系的 1 個大兵書+2 個小兵書。各系兵書:${SYS_ORDER.map(s=>s+"系[大:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="big").join("/")+";小:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="small").join("/")+"]").join(" ")}。請只從我擁有的武將中,推薦 2-3 套三人隊伍(主將/中軍/前鋒),每套列出:隊名、三名武將與各自建議攜帶的 2 個額外戰法(限戰法池內)、每人的兵書(標明系+大兵書+2小兵書)、兵種建議、配隊理由與弱點。請用繁體中文、純文字條列(不要 Markdown 符號),精簡實用。`;
+    prompt=`你是《三國志戰略版》(台港澳服)的資深配將軍師。我擁有的武將:${[...owned].join("、")}。可用的額外戰法池:${tacListText()}。兵書分六大系(始計/虛實/軍形/九變/作戰/用間),每系有大兵書與小兵書,每名武將只能選同一系的 1 個大兵書+2 個小兵書。各系兵書:${SYS_ORDER.map(s=>s+"系[大:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="big").join("/")+";小:"+Object.keys(BOOKS).filter(b=>BOOKS[b].sys===s&&BOOKS[b].tier==="small").join("/")+"]").join(" ")}。請只從我擁有的武將中,推薦 2-3 套三人隊伍(主將/中軍/前鋒),每套列出:隊名、三名武將與各自建議攜帶的 2 個額外戰法(限戰法池內)、每人的兵書(標明系+大兵書+2小兵書)、兵種建議、配隊理由與弱點。分析弱點時請考慮剋制關係:主動戰法輸出隊(如蜀弓/魏法)怕計窮,突擊暴擊隊(如吳騎/三勢呂)怕繳械,藤甲兵隊怕火攻戰法(火燒連營/熯天熾地等)。請用繁體中文、純文字條列(不要 Markdown 符號),精簡實用。`;
   }else{
     if(!myTeam.some(Boolean)){msg.textContent="⚠ 請先在「配將」頁組好我方隊伍";return;}
     prompt=`你是《三國志戰略版》(台港澳服)的資深配將軍師。請點評這套三人隊伍:${teamText(myTeam)}。請分析:強度定位、戰法搭配是否合理、兵種選擇、明顯弱點與剋制它的常見隊伍、以及 1-2 個具體改進建議(可從此戰法池挑選:${tacListText()})。繁體中文、純文字條列(不要 Markdown 符號),精簡實用。`;
@@ -1514,9 +1590,13 @@ document.getElementById("costCap").onchange=()=>{updateCost("my");save();};
 function presetToTeam(p){
   return p.team.map(m=>{
     const b=m[2]||["","","",""];
-    return {gen:findGen(m[0]),tacs:[...m[1]],
-      bk:{sys:b[0]||"",big:b[1]||"",smalls:[b[2]||"",b[3]||""]},
-      red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}}};
+    const gg=findGen(m[0]);
+    const vSys=SYS_ORDER.includes(b[0])?b[0]:"";
+    const vBig=(BOOKS[b[1]]&&BOOKS[b[1]].sys===vSys&&BOOKS[b[1]].tier==="big")?b[1]:"";
+    const vS=[b[2],b[3]].filter(x=>BOOKS[x]&&BOOKS[x].sys===vSys&&BOOKS[x].tier==="small");
+    return {gen:gg,tacs:[...m[1]],arm:bestArmOf(gg),troops:10000,
+      bk:{sys:vSys,big:vBig,smalls:[vS[0]||"",vS[1]||""]},
+      red:{star:0,add:{wu:0,zhi:0,tong:0,su:0}},lv:{add:{wu:0,zhi:0,tong:0,su:0}}};
   });
 }
 document.getElementById("presetSel").onchange=e=>{
