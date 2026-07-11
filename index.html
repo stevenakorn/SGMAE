@@ -82,6 +82,8 @@
   .geninfo .nm{font-size:17px;font-weight:900;letter-spacing:2px;}
   .fx{font-size:10px;padding:2px 7px;margin-left:7px;vertical-align:2px;letter-spacing:1px;
     clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);color:#0a0e14;font-weight:700;}
+  .imm{font-size:10px;padding:2px 7px;margin-left:5px;background:#c084fc;color:#1a0e2e;
+    font-weight:700;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);}
   .fx.魏{background:var(--wei)} .fx.蜀{background:var(--shu)}
   .fx.吳{background:var(--wu)} .fx.群{background:var(--qun)}
   .geninfo .st{font-size:11.5px;color:var(--dim);margin-top:4px;line-height:1.7;}
@@ -198,7 +200,7 @@
     <h1>燎原軍議</h1>
     <p>三國志戰略版(台港澳服)｜配將 × 模擬對戰 × 回合優劣曲線 × AI 軍師</p>
   </div>
-  <span class="tag num">v7.2</span>
+  <span class="tag num">v7.1 · 勝負平判定修正</span>
 </header>
 
 <nav>
@@ -388,18 +390,18 @@ const GENERALS = [
  {n:"鍾會",f:"魏",s:5,c:6,wu:92,zhi:189,tong:174,su:137,apt:{騎:"A",槍:"A",弓:"S",盾:"B",器:"A"},tac:{name:"精練策數",type:"主動",rate:0.4,kind:"dmg",stat:"zhi",pow:1.05,aoe:2,ctrl:0.35},desc:"準備1回合，對敵軍群體（2-3人）造成謀略攻擊（傷害率105%，受智力影響），並繳械（無法進行普通攻擊），持續2回合",inh:"文武雙全",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543371689998341.png"},
  {n:"馬超",f:"蜀",s:5,c:7,wu:227,zhi:81,tong:179,su:135,apt:{騎:"S",槍:"S",弓:"B",盾:"B",器:"B"},tac:{name:"槊血縱橫",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，使自己獲得17點武力及27%群攻（普通攻擊時對目標同部隊其他武將造成傷害）效果，自身為主將時，群攻值為30%",inh:"所向披靡",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543361804023815.png"},
  {n:"董卓",f:"群",s:5,c:7,wu:178,zhi:139,tong:186,su:113,apt:{騎:"A",槍:"B",弓:"S",盾:"S",器:"C"},tac:{name:"酒池肉林",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.3,aoe:1},desc:"戰鬥中，每回合使自身兵力減少（1%×回合數），同時每回合獲得4%倒戈（造成兵刃傷害時，恢復自身基於傷害量的一定兵力）",inh:"暴戾無仁",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543375334848519.png"},
- {n:"左慈",f:"群",s:5,c:5,wu:26,zhi:209,tong:80,su:53,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"C"},tac:{name:"金丹秘術",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:3},desc:"戰鬥前2回合，使我軍全體獲得17.5%規避效果，可免疫傷害，並在戰鬥第3回合開始，獲得休整狀態（每回合恢復一次兵力）",inh:"杯蛇鬼車",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543352119375878.png"},
+ {n:"左慈",f:"群",s:5,c:5,wu:26,zhi:209,tong:80,su:53,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"C"},tac:{name:"金丹秘術",type:"指揮",rate:1,kind:"shield",pow:0.15,aoe:3},desc:"戰鬥前2回合，使我軍全體獲得17.5%規避效果，可免疫傷害，並在戰鬥第3回合開始，獲得休整狀態（每回合恢復一次兵力）",inh:"杯蛇鬼車",imm:true,img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543352119375878.png"},
  {n:"甘寧",f:"吳",s:5,c:6,wu:221,zhi:98,tong:170,su:132,apt:{騎:"A",槍:"S",弓:"S",盾:"A",器:"S"},tac:{name:"錦帆百翎",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，提高自身25%會心機率（觸發時兵刃傷害提高100%）及10%會心傷害；自身為主將時，提高友軍群體（2人）",inh:"百騎劫營",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543347996375047.png"},
  {n:"徐晃",f:"魏",s:5,c:6,wu:192,zhi:141,tong:163,su:97,apt:{騎:"A",槍:"A",弓:"C",盾:"S",器:"B"},tac:{name:"長驅直入",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥中，每次造成兵刃傷害後，使自己造成的兵刃傷害提升7.5%，最大疊加5次",inh:"合軍聚眾",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543368288417801.png"},
  {n:"黃忠",f:"蜀",s:5,c:6,wu:206,zhi:117,tong:171,su:92,apt:{騎:"A",槍:"A",弓:"S",盾:"S",器:"C"},tac:{name:"百步穿楊",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.9,aoe:1},desc:"準備1回合，提高自身12.5%會心機率（觸發時兵刃傷害提高100%），持續2回合，隨後對敵軍全體造成兵刃傷害",inh:"萬箭齊發",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543359149029379.png"},
  {n:"典韋",f:"魏",s:5,c:6,wu:223,zhi:44,tong:162,su:133,apt:{騎:"B",槍:"A",弓:"C",盾:"S",器:"C"},tac:{name:"古之惡來",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.4,aoe:1},desc:"我軍主將即將受到普通攻擊時,自身會對攻擊者進行一次猛擊(傷害率40%)並使其造成兵刃傷害降低9%，持續1回合",inh:"折衝禦侮",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543349019785220.png"},
  {n:"夏侯惇",f:"魏",s:5,c:6,wu:193,zhi:104,tong:193,su:124,apt:{騎:"S",槍:"A",弓:"C",盾:"A",器:"B"},tac:{name:"剛烈不屈",type:"主動",rate:0.4,kind:"dmg",stat:"wu",pow:0.42,aoe:2},desc:"戰鬥中，使自己統率提升19點，受到兵刃傷害時有40%機率對敵軍群體（2人）造成兵刃傷害（傷害率42%）",inh:"絕地反擊",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543345400100873.png"},
  {n:"黃月英",f:"蜀",s:5,c:4,wu:54,zhi:186,tong:124,su:118,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"S"},tac:{name:"工神",type:"被動",rate:1,kind:"buff",pow:0.12},desc:"戰鬥前3回合，使我軍全體獲得先攻（優先行動）狀態，我軍主將造成傷害提升15%，我軍副將造成傷害提升7.5%",inh:"鋒矢陣",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543377159370758.png"},
- {n:"華佗",f:"群",s:5,c:5,wu:31,zhi:182,tong:104,su:139,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"C"},tac:{name:"青囊",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.44,aoe:2},desc:"戰鬥前4回合，使我軍群體（2人）獲得20統率（受智力影響）及急救效果，每次受到傷害時有50%機率回覆一定兵力",inh:"刮骨療毒",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543358452774917.png"},
+ {n:"華佗",f:"群",s:5,c:5,wu:31,zhi:182,tong:104,su:139,apt:{騎:"C",槍:"C",弓:"C",盾:"C",器:"C"},tac:{name:"青囊",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.44,aoe:2},desc:"戰鬥前4回合，使我軍群體（2人）獲得20統率（受智力影響）及急救效果，每次受到傷害時有50%機率回覆一定兵力",inh:"刮骨療毒",imm:true,img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543358452774917.png"},
  {n:"法正",f:"蜀",s:5,c:4,wu:63,zhi:196,tong:131,su:104,apt:{騎:"B",槍:"A",弓:"A",盾:"S",器:"A"},tac:{name:"以逸待勞",type:"指揮",rate:1,kind:"heal",stat:"zhi",pow:0.77,aoe:2},desc:"治療我軍群體（2人，治療率77%，受智力影響），並使其下3次受到傷害分別降低（25%、18.8%、12.5%）",inh:"沉沙決水",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543350051584006.png"},
  {n:"司馬徽",f:"群",s:4,c:3,wu:44,zhi:189,tong:132,su:119,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"水鏡先生",type:"內政",rate:0,kind:"none"},desc:"武將委任為尋訪使時，提升尋出高階獎勵的機率4.5%",inh:"誘敵深入",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543369035003909.png"},
  {n:"顏良",f:"群",s:5,c:5,wu:197,zhi:50,tong:150,su:94,apt:{騎:"A",槍:"S",弓:"B",盾:"A",器:"C"},tac:{name:"勇冠三軍",type:"主動",rate:0.45,kind:"dmg",stat:"wu",pow:0.9,aoe:1,ctrl:0.35},desc:"普通攻擊之後，對攻擊目標再次發起猛攻（傷害率90%），並使其進入震懾狀態（無法行動），持續1回合",inh:"盛氣凌敵",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543353469941769.png"},
- {n:"于吉",f:"群",s:5,c:7,wu:16,zhi:194,tong:102,su:56,apt:{騎:"C",槍:"C",弓:"C",盾:"B",器:"C"},tac:{name:"興雲佈雨",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.36,aoe:3},desc:"戰鬥第2回合開始，使敵軍全體進入水攻狀態，每回合持續造成傷害（傷害率36%，受智力影響），並使其受到傷害增加5%",inh:"杯蛇鬼車",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543348675852296.png"},
+ {n:"于吉",f:"群",s:5,c:7,wu:16,zhi:194,tong:102,su:56,apt:{騎:"C",槍:"C",弓:"C",盾:"B",器:"C"},tac:{name:"興雲佈雨",type:"主動",rate:0.4,kind:"dot",stat:"wu",pow:0.36,aoe:3},desc:"戰鬥第2回合開始，使敵軍全體進入水攻狀態，每回合持續造成傷害（傷害率36%，受智力影響），並使其受到傷害增加5%",inh:"杯蛇鬼車",imm:true,img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543348675852296.png"},
  {n:"張角",f:"群",s:5,c:6,wu:45,zhi:203,tong:156,su:63,apt:{騎:"A",槍:"B",弓:"S",盾:"S",器:"A"},tac:{name:"五雷轟頂",type:"主動",rate:0.3,kind:"dmg",stat:"zhi",pow:0.68,aoe:1,ctrl:0.35},desc:"準備1回合，對敵軍隨機單體造成謀略攻擊（傷害率68%，受智力影響）並由30%機率使其進入震懾狀態（無法行動）",inh:"黃天泰平",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543351783831554.png"},
  {n:"大喬",f:"吳",s:5,c:4,wu:53,zhi:185,tong:154,su:136,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"國色",type:"內政",rate:0,kind:"none"},desc:"武將委任為貿易官時，貿易比例提升1.5%",inh:"魅惑",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543349716039687.png"},
  {n:"小喬",f:"吳",s:5,c:4,wu:48,zhi:189,tong:150,su:141,apt:{騎:"C",槍:"C",弓:"B",盾:"C",器:"C"},tac:{name:"天香",type:"內政",rate:0,kind:"none"},desc:"提升武將13.5%魅力",inh:"奪魂挾魄",img:"https://image.aligames.com/s/y9s/g/2020/5/22/448543360667367424.png"},
@@ -1022,7 +1024,7 @@ function renderTeam(side){
       const row=document.createElement("div"); row.className="genrow";
       row.appendChild(avatarEl(g,72));
       const info=document.createElement("div"); info.className="geninfo";
-      info.innerHTML=`<span class="nm">${g.n}</span><span class="fx ${g.f}">${g.f}</span>
+      info.innerHTML=`<span class="nm">${g.n}</span><span class="fx ${g.f}">${g.f}</span>${g.imm?'<span class="imm">仙</span>':''}
         <div class="st num-line">★${g.s} 統御<span class="num">${g.c}</span>｜武<span class="num">${g.wu}</span> 智<span class="num">${g.zhi}</span> 統<span class="num">${g.tong}</span> 速<span class="num">${g.su}</span><br>
         <span class="apt">騎${ap(g,"騎")} 槍${ap(g,"槍")} 弓${ap(g,"弓")} 盾${ap(g,"盾")} 器${ap(g,"器")}</span></div>
         <div class="builtin" title="${(g.desc||"").replace(/"/g,"&quot;")}">自帶:${g.tac.name} <small>(${g.tac.type})</small></div>`;
@@ -1215,11 +1217,12 @@ function makeUnit(slot,team,pos){
   // 出戰兵種適性倍率:S1.2 A1.0 B0.85 C0.7,乘到四維
   const arm=slot.arm||bestArmOf(g);
   const am=APT_MULT[g.apt[arm]]||1;
+  const imm=g.imm?1.3:1;   // 仙人特性:兵種適性後再全屬性 ×1.3
   const base={
-    wu:(g.wu+(ra.wu||0)+(la.wu||0))*am,
-    zhi:(g.zhi+(ra.zhi||0)+(la.zhi||0))*am,
-    tong:(g.tong+(ra.tong||0)+(la.tong||0))*am,
-    su:(g.su+(ra.su||0)+(la.su||0))*am };
+    wu:(g.wu+(ra.wu||0)+(la.wu||0))*am*imm,
+    zhi:(g.zhi+(ra.zhi||0)+(la.zhi||0))*am*imm,
+    tong:(g.tong+(ra.tong||0)+(la.tong||0))*am*imm,
+    su:(g.su+(ra.su||0)+(la.su||0))*am*imm };
   const eg={n:g.n,f:g.f,s:g.s,c:g.c,apt:g.apt,tac:g.tac,arm,
     wu:Math.round(base.wu),zhi:Math.round(base.zhi),
     tong:Math.round(base.tong),su:Math.round(base.su)};
@@ -1382,7 +1385,8 @@ function scoreTeam(team){
   for(const s of us){
     const g=s.gen, tacs=tacsOf(s), bks=bkOf(s);
     facs[g.f]=(facs[g.f]||0)+1;
-    const atk=Math.max(g.wu,g.zhi);
+    const imm=g.imm?1.3:1;
+    const atk=Math.max(g.wu,g.zhi)*imm;
     let tp=0; for(const t of tacs)if(["dmg","dot","drain"].includes(t.kind))tp+=(t.pow||0)*(t.aoe||1);
     const am={S:1.2,A:1,B:.85,C:.7}[g.apt[s.arm||bestArmOf(g)]]||1;
     let bd=0; for(const b of bks)bd+=(b.d||0)+(b.dot||0);
